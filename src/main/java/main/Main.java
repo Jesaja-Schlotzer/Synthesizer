@@ -1,9 +1,14 @@
 package main;
 
+import audio.components.oscillators.Oscillator;
+import audio.components.oscillators.SineOscillator;
+import io.AudioPlayer;
 import ui.MatlabChart;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class Main {
 
@@ -33,92 +38,65 @@ public class Main {
         fig.saveas("MyPlot.png",640,480);
 
 
+        AudioPlayer audioPlayer = new AudioPlayer();
+
+        audioPlayer.test();
+
+        audioPlayer.play();
+
         try {
-            generateTone();
-            loopSound(true);
-            play();
-            Thread.sleep(1000);
-            stop();
-        } catch (LineUnavailableException | InterruptedException e) {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-    static Clip clip;
 
-
-    private static void play() {
-        clip.start();
-    }
-
-
-    private static void stop() {
-        clip.stop();
-    }
+        audioPlayer.stop();
 
 
 
-    public static void loopSound(boolean commence) {
-        if ( commence ) {
-            clip.setFramePosition(0);
-            clip.loop( Clip.LOOP_CONTINUOUSLY );
-        } else {
-            clip.stop();
+        AudioSystem.getAudioFileReaders();
+
+
+        int BUFFER_SIZE = 44100*10;
+        Oscillator oscillator = new SineOscillator(220, 128, 0, 44100);
+
+        SourceDataLine line = null;
+        AudioInputStream ais = null;
+        try {
+            ais = AudioSystem.getAudioInputStream(oscillator.getGeneratorInputStream());
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    }
-
-    public static void generateTone() throws LineUnavailableException {
-
-        if ( clip!=null ) {
-            clip.stop();
-            clip.close();
-        } else {
-            clip = AudioSystem.getClip();
+        AudioFormat audioFormat = ais.getFormat();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+        try {
+            line = (SourceDataLine) AudioSystem.getLine(info);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
         }
-        boolean addHarmonic = false;
-
-        int intFPW = 440;
-
-        float sampleRate = 44100;
-
-        // oddly, the sound does not loop well for less than
-        // around 5 or so, wavelengths
-        int wavelengths = 20;
-        byte[] buf = new byte[2*intFPW*wavelengths];
-        AudioFormat af = new AudioFormat(
-                sampleRate,
-                8,  // sample size in bits
-                2,  // channels
-                true,  // signed
-                false  // bigendian
-        );
-
-        int maxVol = 127;
-        for(int i=0; i<intFPW*wavelengths; i++){
-            double angle = ((float)(i*2)/((float)intFPW))*(Math.PI);
-            buf[i*2]= getByteValue(angle);
-            if(addHarmonic) {
-                buf[(i*2)+1]=getByteValue(2*angle);
-            } else {
-                buf[(i*2)+1] = buf[i*2];
+        try {
+            line.open(audioFormat);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        line.start();
+        byte[] samples = new byte[BUFFER_SIZE];
+        int count = 0;
+        while (true) {
+            try {
+                if ((count = ais.read(samples, 0, BUFFER_SIZE)) == -1) break;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
+            line.write(samples, 0, count);
 
-        try {
-            byte[] b = buf;
-            AudioInputStream ais = new AudioInputStream(
-                    new ByteArrayInputStream(b),
-                    af,
-                    buf.length/2 );
-
-            clip.open( ais );
-        } catch(Exception e) {
-            e.printStackTrace();
+            line.drain();
+            line.close();
         }
     }
 
-    private static byte getByteValue(double angle) {
-        int maxVol = 127;
-        return (byte) Math.round(Math.sin(angle) * maxVol);
-    }
+
 
 }
