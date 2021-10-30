@@ -1,20 +1,23 @@
 package audio.components.oscillators;
 
-public class SineOscillator extends Oscillator{
+public class TriangleOscillator extends Oscillator{
 
-    private double step;
+    private double period;
 
-    public SineOscillator(double frequency, double amplitude, double phase, double sampleRate) {
+    public TriangleOscillator(double frequency, double amplitude, double phase, double sampleRate) {
         super(frequency, amplitude, phase, sampleRate);
 
-        step = (2 * Math.PI * frequency) / sampleRate;
+        this.period = sampleRate / frequency;
+        this.phase = ((phase + 90)/ 360) * period;
     }
 
 
 
     public double next() {
-        double value = Math.sin(t + phase);
-        t += step;
+        double div = (t + phase) / period;
+        double value = 2 * (div - Math.floor(0.5 + div));
+        value = (Math.abs(value) - 0.5) * 2;
+        t++;
         return value * amplitude;
     }
 
@@ -38,7 +41,7 @@ public class SineOscillator extends Oscillator{
 
     @Override
     public String toString() {
-        return "Oscillator[Type=Sine, Frequency="+ frequency
+        return "Oscillator[Type=Triangle, Frequency="+ frequency
                 +", Amplitude="+ amplitude +", Phase="+ phase
                 +", SampleRate="+ sampleRate +"]";
     }

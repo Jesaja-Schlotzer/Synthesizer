@@ -1,48 +1,41 @@
 package audio.components.oscillators;
 
-import io.GeneratorInputStream;
+import audio.components.Generator;
 
-public abstract class Oscillator {
-
-    protected double i;
+public abstract class Oscillator extends Generator {
 
     protected double frequency;
     protected double amplitude;
     protected double phase;
     protected double sampleRate;
 
+
     public Oscillator(double frequency, double amplitude, double phase, double sampleRate) {
         this.frequency = frequency;
         this.amplitude = amplitude;
         this.phase = phase;
         this.sampleRate = sampleRate;
+
+        this.t = 0;
     }
 
 
-    public abstract double next();
+    public double getFrequency() {
+        return frequency;
+    }
 
+    public double getAmplitude() {
+        return amplitude;
+    }
 
-    public GeneratorInputStream getGeneratorInputStream() {
-        return new GeneratorInputStream(this);
+    public double getPhase() {
+        return phase;
+    }
+
+    public double getSampleRate() {
+        return sampleRate;
     }
 
 
-    public double getI() {
-        return i;
-    }
-
-    public void setI(double i) {
-        this.i = i;
-    }
-
-
-
-    @Override
     public abstract boolean equals(Object obj);
-
-    @Override
-    public abstract Object clone() throws CloneNotSupportedException;
-
-    @Override
-    public abstract String toString();
 }

@@ -1,102 +1,105 @@
 package main;
 
-import audio.components.oscillators.Oscillator;
-import audio.components.oscillators.SineOscillator;
+import audio.Synthesizer;
+import audio.components.*;
+import audio.components.combiners.Mixer;
+import audio.components.modulators.envelopes.ADSREnvelope;
+import audio.components.oscillators.*;
+import audio.components.oscillators.modulated.ModulatedOscillator;
+import audio.components.oscillators.modulated.ModulatedSineOscillator;
+import audio.components.oscillators.modulated.ModulatedSquareOscillator;
+import audio.interfaces.ModulationInterface;
+import audio.interfaces.Modulator;
 import io.AudioPlayer;
 import ui.MatlabChart;
-
-import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) {
+
+        ADSREnvelope asdrEnv = new ADSREnvelope(7000, 8500, 0.3, 10000);
+
+        ModulatedOscillator osc = new ModulatedSquareOscillator(
+                ModulationInterface.CONSTANT(261.63),
+                asdrEnv.asInterface(64),
+                0,
+                44100);
+
+        osc.reset();
+
         // Create some sample data
-        double[] x = new double[100]; x[0] = 1;
-        double[] y1 = new double[100]; y1[0] = 200;
-        double[] y2 = new double[100]; y2[0] = 300;
-        for(int i = 1; i < x.length; i++){
-            x[i] = i+1;
-            y1[i] = y1[i-1] + Math.random()*10 - 4;
-            y2[i] = y2[i-1] + Math.random()*10 - 6;
+
+        int steps = 44100;
+        double width = 300;
+
+        double[] x = new double[steps+1];
+        double[] y1 = new double[steps+1];
+        double[] y2 = new double[steps+1];
+        int c = 0;
+
+        asdrEnv.press();
+
+        for(double i = 0; i < width; i += (width/steps)){
+            x[c] = i;
+            y1[c] = osc.next();
+            osc.setT(i);
+            if(i > 220) {
+                asdrEnv.release();
+            }
+            c++;
         }
 
         MatlabChart fig = new MatlabChart();
-        fig.plot(x, y1, "-r", 2.0f, "AAPL");
-        fig.plot(x, y2, ":k", 3.0f, "BAC");
+        fig.plot(x, y1, "-r", 1.5f, "C4");
+        //fig.plot(x, y2, ":k", 3.0f, "BAC");
         fig.RenderPlot();
-        fig.title("Stock 1 vs. Stock 2");
-        fig.xlim(10, 100);
-        fig.ylim(200, 300);
-        fig.xlabel("Days");
-        fig.ylabel("Price");
+        fig.title("");
+        fig.xlim(-10, width);
+        fig.ylim(-1.5, 1.5);
+        fig.xlabel("time");
+        fig.ylabel("amp");
         fig.grid("on","on");
         fig.legend("northeast");
         fig.font("Helvetica",15);
         fig.saveas("MyPlot.png",640,480);
 
 
-        AudioPlayer audioPlayer = new AudioPlayer();
 
-        audioPlayer.test();
+        ModulatedOscillator osc1 = new ModulatedSineOscillator(
+                ModulationInterface.CONSTANT(261.63),
+                asdrEnv.asInterface(64),
+                0,
+                44100);
 
-        audioPlayer.play();
+        Oscillator osc2 = new SineOscillator(440, 32, 0, 44100);
 
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        Generator gen = osc1;//new Mixer(osc1, osc2);
+
+        for (int i = 0; i < 441; i++) {
+            //System.out.println(osc1.next());
         }
 
-        audioPlayer.stop();
+        gen.reset();
 
-
-
-        AudioSystem.getAudioFileReaders();
-
-
-        int BUFFER_SIZE = 44100*10;
-        Oscillator oscillator = new SineOscillator(220, 128, 0, 44100);
-
-        SourceDataLine line = null;
-        AudioInputStream ais = null;
-        try {
-            ais = AudioSystem.getAudioInputStream(oscillator.getGeneratorInputStream());
-        } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        AudioFormat audioFormat = ais.getFormat();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        try {
-            line = (SourceDataLine) AudioSystem.getLine(info);
-        } catch (LineUnavailableException e) {
-            e.printStackTrace();
-        }
-        try {
-            line.open(audioFormat);
-        } catch (LineUnavailableException e) {
-            e.printStackTrace();
-        }
-        line.start();
-        byte[] samples = new byte[BUFFER_SIZE];
-        int count = 0;
-        while (true) {
+        new Thread(() -> {
             try {
-                if ((count = ais.read(samples, 0, BUFFER_SIZE)) == -1) break;
-            } catch (IOException e) {
+                asdrEnv.press();
+                Thread.sleep(2000);
+                asdrEnv.release();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            line.write(samples, 0, count);
+        }).start();
 
-            line.drain();
-            line.close();
-        }
+        AudioPlayer ap = new AudioPlayer(new Synthesizer(gen));
+
+        ap.init();
+        ap.start();
+        ap.play(3);
+        ap.stop();
+
+
     }
 
 
-
-}
+    }

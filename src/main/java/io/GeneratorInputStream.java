@@ -1,6 +1,6 @@
 package io;
 
-import audio.components.oscillators.Oscillator;
+import audio.components.Generator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,21 +8,22 @@ import java.io.InputStream;
 
 public class GeneratorInputStream extends InputStream {
 
-    Oscillator oscillator;
+    Generator generator;
 
-    public GeneratorInputStream(Oscillator oscillator) {
-        this.oscillator = oscillator;
+
+    public GeneratorInputStream(Generator generator) {
+        this.generator = generator;
     }
 
 
     @Override
     public int read() {
-        return (int) oscillator.next();
+        return (int) generator.next();
     }
 
     @Override
     public int read(byte[] b) throws IOException {
-        return read(b,0,b.length);
+        return read(b,0, b.length);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class GeneratorInputStream extends InputStream {
     @Override
     public long skip(long n) throws IOException {
         for (long i = 0; i < n; i++) {
-            oscillator.next();
+            generator.next();
         }
         return n;
     }
@@ -58,22 +59,18 @@ public class GeneratorInputStream extends InputStream {
     }
 
 
-    Oscillator markOscillator;
+    Generator markGenerator;
 
     @Override
     public synchronized void mark(int readlimit) {
-        try {
-            markOscillator = (Oscillator) oscillator.clone();
-            markOscillator.setI(oscillator.getI());
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+        markGenerator = (Generator) markGenerator.clone();
+        markGenerator.setT(markGenerator.getT());
     }
 
     @Override
     public synchronized void reset() throws IOException {
-        oscillator = markOscillator;
-        markOscillator = null;
+        generator = markGenerator;
+        markGenerator = null;
     }
 
     @Override
