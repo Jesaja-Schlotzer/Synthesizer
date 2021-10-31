@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 public class GeneratorInputStream extends InputStream {
 
+
     Generator generator;
 
 

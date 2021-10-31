@@ -11,10 +11,10 @@ public abstract class Oscillator extends Generator {
 
 
     public Oscillator(double frequency, double amplitude, double phase, double sampleRate) {
-        this.frequency = frequency;
-        this.amplitude = amplitude;
+        this.frequency = Math.max(frequency, 0);
+        this.amplitude = Math.max(amplitude, 0);
         this.phase = phase;
-        this.sampleRate = sampleRate;
+        this.sampleRate = Math.max(sampleRate, 0);
 
         this.t = 0;
     }

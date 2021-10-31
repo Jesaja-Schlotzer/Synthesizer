@@ -27,10 +27,10 @@ public class ADSREnvelope implements Modulator, Pressable {
 
 
     public ADSREnvelope(double attack, double decay, double sustain, double release) {
-        this.attack = attack;
-        this.decay = decay;
+        this.attack = Math.max(attack, 0);
+        this.decay = Math.max(decay, 0);
         this.sustain = Math.min(Math.max(sustain, 0), 1);
-        this.release = release;
+        this.release = Math.max(release, 0);
 
         attackSlope = 1 / attack;
         decaySlope = -((1-sustain) / decay);
@@ -41,7 +41,7 @@ public class ADSREnvelope implements Modulator, Pressable {
 
 
     // TODO TODO TODO TODO !!! countedSamples von "ausen" geziehen (vielleicht als parameter durchreichen) so könnte Env an vielen Stellen gleichzeitig verwendet werden"
-
+//TODO release wenn decay evtl. broken
 
     @Override
     public ModulationInterface asInterface(double in) {
@@ -64,6 +64,7 @@ public class ADSREnvelope implements Modulator, Pressable {
                 value += decaySlope;
                 if(value <= sustain) {
                     state = SUSTAIN;
+                    value = sustain;
                 }
                 return value * in;
 
@@ -85,7 +86,18 @@ public class ADSREnvelope implements Modulator, Pressable {
 
     @Override
     public void press() {
-        state = ATTACK;
+        if(attack > 0) {
+            state = ATTACK;
+            value = 0;
+        }else {
+            value = 1;
+            if(decay > 0) {
+                state = DECAY;
+            }else {
+                value = sustain;
+                state = SUSTAIN;
+            }
+        }
     }
 
     @Override

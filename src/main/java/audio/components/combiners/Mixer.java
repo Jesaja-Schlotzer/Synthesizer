@@ -4,7 +4,7 @@ import audio.components.Generator;
 
 public class Mixer extends Generator{
 
-    Generator[] generators;
+    private Generator[] generators;
 
     public Mixer(Generator... generators) {
         this.generators = generators;

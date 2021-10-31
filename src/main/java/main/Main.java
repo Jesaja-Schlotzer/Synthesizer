@@ -2,30 +2,38 @@ package main;
 
 import audio.Synthesizer;
 import audio.components.*;
-import audio.components.combiners.Mixer;
+import audio.components.modulators.Modificator;
 import audio.components.modulators.envelopes.ADSREnvelope;
+import audio.components.modulators.lfos.LFO;
 import audio.components.oscillators.*;
 import audio.components.oscillators.modulated.ModulatedOscillator;
 import audio.components.oscillators.modulated.ModulatedSineOscillator;
 import audio.components.oscillators.modulated.ModulatedSquareOscillator;
 import audio.interfaces.ModulationInterface;
-import audio.interfaces.Modulator;
 import io.AudioPlayer;
-import ui.MatlabChart;
+import io.Microphone;
+
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
+import javax.sound.sampled.*;
+import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        ADSREnvelope asdrEnv = new ADSREnvelope(7000, 8500, 0.3, 10000);
+/*
+        ADSREnvelope asdrEnv = new ADSREnvelope(3000, 6000, 0.8, 8000);
+        ADSREnvelope asdrEnv2 = new ADSREnvelope(4000, 5000, 0.7, 10000);
 
         ModulatedOscillator osc = new ModulatedSquareOscillator(
-                ModulationInterface.CONSTANT(261.63),
-                asdrEnv.asInterface(64),
+                asdrEnv2.asInterface(261.63), //ModulationInterface.CONSTANT(261.63),
+                asdrEnv.asInterface(1),
                 0,
                 44100);
 
-        osc.reset();
+
 
         // Create some sample data
 
@@ -47,6 +55,10 @@ public class Main {
                 asdrEnv.release();
             }
             c++;
+
+            if(c % 100 == 0) {
+                System.out.println(osc.getAmplitude());
+            }
         }
 
         MatlabChart fig = new MatlabChart();
@@ -63,29 +75,41 @@ public class Main {
         fig.font("Helvetica",15);
         fig.saveas("MyPlot.png",640,480);
 
+*/
+
+        ADSREnvelope asdrEnv = new ADSREnvelope(3000, 6000, 0.4, 8000);
+        ADSREnvelope asdrEnv2 = new ADSREnvelope(20000, 5000, 0.7, 20000);
+
+        LFO lfo = new LFO(new SineOscillator(3, 1, 0, 44100));
 
 
         ModulatedOscillator osc1 = new ModulatedSineOscillator(
+                //asdrEnv.asInterface(261.63),
                 ModulationInterface.CONSTANT(261.63),
-                asdrEnv.asInterface(64),
+                asdrEnv2.asInterface(64),
                 0,
                 44100);
 
-        Oscillator osc2 = new SineOscillator(440, 32, 0, 44100);
+        ModulatedOscillator osc2 = new ModulatedSquareOscillator(
+                asdrEnv2.asInterface(120),
+                ModulationInterface.CONSTANT(50),
+                0,
+                44100
+        );
 
-        Generator gen = osc1;//new Mixer(osc1, osc2);
+        Oscillator osc3 = new SineOscillator(261.63, 64, 0, 44100);
 
-        for (int i = 0; i < 441; i++) {
-            //System.out.println(osc1.next());
-        }
+        Generator gen = osc1;
 
         gen.reset();
 
         new Thread(() -> {
             try {
                 asdrEnv.press();
-                Thread.sleep(2000);
+                asdrEnv2.press();
+                Thread.sleep(1000);
                 asdrEnv.release();
+                asdrEnv2.release();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -95,11 +119,58 @@ public class Main {
 
         ap.init();
         ap.start();
-        ap.play(3);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ap.stop();
 
 
-    }
+
+        try {
+            Microphone mic = new Microphone(TEST_FORMAT);/*
+                    new AudioFormat(
+                        AudioFormat.Encoding.PCM_SIGNED,
+                        16000,
+                        16,
+                        1,
+                        2,
+                        16000,
+                        false));*/
+
+            //Modificator modificator = new Modificator(mic, lfo);
+
+            AudioPlayer audioPlayer = new AudioPlayer(new Synthesizer(mic));
+            audioPlayer.init();
+
+            mic.connectMicrophone();
+            mic.startListening();
+
+            audioPlayer.start();
+
+            Thread.sleep(50000);
+
+            audioPlayer.stop();
+
+            mic.stopListening();
+            mic.disconnectMicrophone();
+
+        } catch (LineUnavailableException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
     }
+
+
+    public static final AudioFormat TEST_FORMAT = new AudioFormat(
+            AudioFormat.Encoding.PCM_SIGNED,
+            22050,
+            8,
+            1,
+            1,
+            22050,
+            false);
+
+}

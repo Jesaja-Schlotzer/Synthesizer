@@ -2,7 +2,7 @@ package audio.components;
 
 import io.GeneratorInputStream;
 
-public abstract class Generator {
+public abstract class Generator /*TODO extends (Interface) "keine ahnung"     (um später Filter nicht mit Generator zu implementen für logik dies das)*/{
 
     protected double t = 0;
 
