@@ -1,6 +1,7 @@
 package io;
 
 import audio.Synthesizer;
+import audio.components.Generator;
 import audio.components.oscillators.Oscillator;
 import audio.components.oscillators.SineOscillator;
 import main.Main;
@@ -17,7 +18,7 @@ public class AudioPlayer {
 
 
 
-    private Synthesizer synth;
+    private Generator generator;
     private AudioFormat audioFormat;
     private InputStream audioInputStream;
     private SourceDataLine sourceDataLine;
@@ -29,8 +30,8 @@ public class AudioPlayer {
 
 
 
-    public AudioPlayer(Synthesizer synth) {
-        this.synth = synth;
+    public AudioPlayer(Generator generator) {
+        this.generator = generator;
 
         sampleRate = 44100; // TODO später von Synth lesen
 
@@ -47,7 +48,7 @@ public class AudioPlayer {
 
     public void init() {
         try {
-            audioInputStream = new GeneratorInputStream(synth);
+            audioInputStream = new GeneratorInputStream(generator);
 
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 

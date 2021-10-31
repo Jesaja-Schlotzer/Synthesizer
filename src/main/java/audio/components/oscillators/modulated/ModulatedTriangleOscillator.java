@@ -1,5 +1,6 @@
 package audio.components.oscillators.modulated;
 
+import audio.components.Generator;
 import audio.interfaces.ModulationInterface;
 
 public class ModulatedTriangleOscillator extends ModulatedOscillator {
@@ -38,7 +39,7 @@ public class ModulatedTriangleOscillator extends ModulatedOscillator {
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new ModulatedTriangleOscillator(frequencyMod, amplitudeMod, phase, sampleRate);
     }
 

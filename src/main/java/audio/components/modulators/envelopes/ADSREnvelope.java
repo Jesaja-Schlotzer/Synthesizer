@@ -4,13 +4,7 @@ import audio.interfaces.ModulationInterface;
 import audio.interfaces.Modulator;
 import io.interfaces.Pressable;
 
-public class ADSREnvelope implements Modulator, Pressable {
-
-    private static final int NONE = -1;
-    private static final int ATTACK = 0;
-    private static final int DECAY = 1;
-    private static final int SUSTAIN = 2;
-    private static final int RELEASE = 3;
+public class ADSREnvelope extends Envelope implements Modulator {
 
 
     private double attack;
@@ -23,7 +17,7 @@ public class ADSREnvelope implements Modulator, Pressable {
     private double releaseSlope;
     private double value;
 
-    private int state;
+    private STAGE state;
 
 
     public ADSREnvelope(double attack, double decay, double sustain, double release) {
@@ -36,7 +30,7 @@ public class ADSREnvelope implements Modulator, Pressable {
         decaySlope = -((1-sustain) / decay);
         releaseSlope = -(sustain / release);
 
-        state = NONE;
+        state = STAGE.NONE;
     }
 
 
@@ -56,14 +50,14 @@ public class ADSREnvelope implements Modulator, Pressable {
             case ATTACK:
                 value += attackSlope;
                 if(value >= 1) {
-                    state = DECAY;
+                    state = STAGE.DECAY;
                 }
                 return value * in;
 
             case DECAY:
                 value += decaySlope;
                 if(value <= sustain) {
-                    state = SUSTAIN;
+                    state = STAGE.SUSTAIN;
                     value = sustain;
                 }
                 return value * in;
@@ -74,7 +68,7 @@ public class ADSREnvelope implements Modulator, Pressable {
             case RELEASE:
                 value += releaseSlope;
                 if(value <= 0) {
-                    state = NONE;
+                    state = STAGE.NONE;
                 }
                 return value * in;
 
@@ -87,24 +81,37 @@ public class ADSREnvelope implements Modulator, Pressable {
     @Override
     public void press() {
         if(attack > 0) {
-            state = ATTACK;
+            state = STAGE.ATTACK;
             value = 0;
         }else {
             value = 1;
             if(decay > 0) {
-                state = DECAY;
+                state = STAGE.DECAY;
             }else {
                 value = sustain;
-                state = SUSTAIN;
+                state = STAGE.SUSTAIN;
             }
         }
     }
 
     @Override
     public void release() {
-        if(state == NONE) {
+        if(state == STAGE.NONE) {
             return;
         }
-        state = RELEASE;
+        state = STAGE.RELEASE;
+    }
+
+
+
+
+    @Override
+    public String toString() {
+        return "Envelope[Type=ADSR, Attack="+attack+", Decay="+decay+", Sustain="+sustain+", Release="+release+"]";
+    }
+
+    @Override
+    public Envelope clone() {
+        return new ADSREnvelope(attack, decay, sustain, release);
     }
 }

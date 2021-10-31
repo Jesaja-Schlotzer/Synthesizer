@@ -28,6 +28,6 @@ public abstract class Generator /*TODO extends (Interface) "keine ahnung"     (u
 
 
     public abstract String toString();
-    public abstract Object clone();
+    public abstract Generator clone();
 
 }

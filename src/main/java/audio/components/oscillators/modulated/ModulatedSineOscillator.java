@@ -1,5 +1,6 @@
 package audio.components.oscillators.modulated;
 
+import audio.components.Generator;
 import audio.interfaces.ModulationInterface;
 
 public class ModulatedSineOscillator extends ModulatedOscillator {
@@ -31,7 +32,7 @@ public class ModulatedSineOscillator extends ModulatedOscillator {
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new ModulatedSineOscillator(frequencyMod, amplitudeMod, phase, sampleRate);
     }
 

@@ -24,7 +24,7 @@ public class Modificator extends Generator {
     }
 
     @Override
-    public Object clone() {
-        return new Modificator((Generator) generator.clone(), modulator);
+    public Generator clone() {
+        return new Modificator(generator.clone(), modulator);
     }
 }

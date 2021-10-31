@@ -31,10 +31,10 @@ public class Mixer extends Generator{
 
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         Generator[] clonedGenerators = new Generator[generators.length];
         for (int i = 0; i < generators.length; i++) {
-            clonedGenerators[i] = (Generator) generators[i].clone();
+            clonedGenerators[i] = generators[i].clone();
         }
         return new Mixer(clonedGenerators);
     }

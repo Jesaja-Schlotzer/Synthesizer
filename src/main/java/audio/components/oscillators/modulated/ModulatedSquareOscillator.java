@@ -1,5 +1,6 @@
 package audio.components.oscillators.modulated;
 
+import audio.components.Generator;
 import audio.interfaces.ModulationInterface;
 
 public class ModulatedSquareOscillator extends ModulatedOscillator {
@@ -59,7 +60,7 @@ public class ModulatedSquareOscillator extends ModulatedOscillator {
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new ModulatedSquareOscillator(frequencyMod, amplitudeMod, phase, sampleRate, thresholdMod);
     }
 

@@ -84,7 +84,7 @@ public class Microphone extends Generator {
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         try {
             return new Microphone(targetDataLine.getFormat());
         } catch (LineUnavailableException e) {

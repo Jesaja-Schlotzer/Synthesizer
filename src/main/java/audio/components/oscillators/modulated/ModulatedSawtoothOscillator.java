@@ -1,5 +1,6 @@
 package audio.components.oscillators.modulated;
 
+import audio.components.Generator;
 import audio.interfaces.ModulationInterface;
 
 public class ModulatedSawtoothOscillator extends ModulatedOscillator {
@@ -38,7 +39,7 @@ public class ModulatedSawtoothOscillator extends ModulatedOscillator {
     }
 
     @Override
-    public Object clone(){
+    public Generator clone(){
         return new ModulatedSawtoothOscillator(frequencyMod, amplitudeMod, phase, sampleRate);
     }
 

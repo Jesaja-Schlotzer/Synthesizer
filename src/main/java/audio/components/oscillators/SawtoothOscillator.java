@@ -1,5 +1,7 @@
 package audio.components.oscillators;
 
+import audio.components.Generator;
+
 public class SawtoothOscillator extends Oscillator{
 
     private double period;
@@ -35,7 +37,7 @@ public class SawtoothOscillator extends Oscillator{
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new SawtoothOscillator(frequency, amplitude, phase, sampleRate);
     }
 

@@ -26,7 +26,7 @@ public class Synthesizer extends Generator {
     }
 
     @Override
-    public Object clone() {
-        return new Synthesizer((Generator) generator.clone());
+    public Generator clone() {
+        return new Synthesizer(generator.clone());
     }
 }

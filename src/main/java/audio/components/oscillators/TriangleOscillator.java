@@ -1,5 +1,7 @@
 package audio.components.oscillators;
 
+import audio.components.Generator;
+
 public class TriangleOscillator extends Oscillator{
 
     private double period;
@@ -35,7 +37,7 @@ public class TriangleOscillator extends Oscillator{
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new SineOscillator(frequency, amplitude, phase, sampleRate);
     }
 

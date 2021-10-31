@@ -1,5 +1,7 @@
 package audio.components.oscillators;
 
+import audio.components.Generator;
+
 public class SquareOscillator extends Oscillator{
 
     private double step;
@@ -55,7 +57,7 @@ public class SquareOscillator extends Oscillator{
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new SquareOscillator(frequency, amplitude, phase, sampleRate, threshold);
     }
 

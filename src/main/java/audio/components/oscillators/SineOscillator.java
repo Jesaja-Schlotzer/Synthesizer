@@ -1,5 +1,7 @@
 package audio.components.oscillators;
 
+import audio.components.Generator;
+
 public class SineOscillator extends Oscillator{
 
     private double step;
@@ -32,7 +34,7 @@ public class SineOscillator extends Oscillator{
     }
 
     @Override
-    public Object clone() {
+    public Generator clone() {
         return new SineOscillator(frequency, amplitude, phase, sampleRate);
     }
 

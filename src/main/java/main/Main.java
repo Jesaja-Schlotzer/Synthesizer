@@ -12,12 +12,9 @@ import audio.components.oscillators.modulated.ModulatedSquareOscillator;
 import audio.interfaces.ModulationInterface;
 import io.AudioPlayer;
 import io.Microphone;
+import midi.PCKeyboard;
 
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.ShortMessage;
 import javax.sound.sampled.*;
-import java.util.Arrays;
 
 public class Main {
 
@@ -90,14 +87,6 @@ public class Main {
                 0,
                 44100);
 
-        ModulatedOscillator osc2 = new ModulatedSquareOscillator(
-                asdrEnv2.asInterface(120),
-                ModulationInterface.CONSTANT(50),
-                0,
-                44100
-        );
-
-        Oscillator osc3 = new SineOscillator(261.63, 64, 0, 44100);
 
         Generator gen = osc1;
 
@@ -107,7 +96,7 @@ public class Main {
             try {
                 asdrEnv.press();
                 asdrEnv2.press();
-                Thread.sleep(1000);
+                Thread.sleep(10);
                 asdrEnv.release();
                 asdrEnv2.release();
             } catch (InterruptedException e) {
@@ -120,16 +109,35 @@ public class Main {
         ap.init();
         ap.start();
         try {
-            Thread.sleep(10);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         ap.stop();
 
 
+        /*  PC Keyboard  */
 
+        PCKeyboard keyboard = new PCKeyboard(
+                new ModulatedSineOscillator(()->0, ()->64, 0, 44100),
+                new ADSREnvelope(5000, 6000, 0.5, 10000)
+                );
+
+
+        AudioPlayer ap2 = new AudioPlayer(keyboard.getOutputGenerator());
+
+        ap2.init();
+        ap2.start();
         try {
-            Microphone mic = new Microphone(TEST_FORMAT);/*
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //ap2.stop();
+
+/*                      Microphone
+        try {
+            Microphone mic = new Microphone(TEST_FORMAT);
                     new AudioFormat(
                         AudioFormat.Encoding.PCM_SIGNED,
                         16000,
@@ -137,7 +145,7 @@ public class Main {
                         1,
                         2,
                         16000,
-                        false));*/
+                        false));
 
             //Modificator modificator = new Modificator(mic, lfo);
 
@@ -159,7 +167,7 @@ public class Main {
         } catch (LineUnavailableException | InterruptedException e) {
             e.printStackTrace();
         }
-
+*/
 
     }
 
