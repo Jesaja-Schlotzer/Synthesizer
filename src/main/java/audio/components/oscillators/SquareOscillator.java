@@ -1,24 +1,21 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
+import audio.interfaces.ModulationInterface;
 
-public class SquareOscillator extends Oscillator{
+public class SquareOscillator extends Oscillator {
 
-    private double step;
-    private double threshold = 0.5;
+    private ModulationInterface pulseWidthMod = () -> 0.5;
 
-    public SquareOscillator(double frequency, double amplitude, double phase, double sampleRate) {
-        super(frequency, amplitude, phase, sampleRate);
 
-        step = (2 * Math.PI * frequency) / sampleRate;
+    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double phase, double sampleRate) {
+        super(frequencyMod, amplitudeMod, phase, sampleRate);
     }
 
-    public SquareOscillator(double frequency, double amplitude, double phase, double sampleRate, double threshold) {
-        super(frequency, amplitude, phase, sampleRate);
+    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double phase, double sampleRate, ModulationInterface pulseWidthMod) {
+        super(frequencyMod, amplitudeMod, phase, sampleRate);
 
-        this.threshold = threshold;
-
-        step = (2 * Math.PI * frequency) / sampleRate;
+        this.pulseWidthMod = pulseWidthMod;
     }
 
 
@@ -26,21 +23,26 @@ public class SquareOscillator extends Oscillator{
     @Override
     public double next() {
         double value = Math.sin(t + phase);
-        t += step;
-        if(value < threshold) {
-            return -amplitude;
+        t += (2 * Math.PI * frequencyMod.get()) / sampleRate;
+        if(value < pulseWidthMod.get()) {
+            return -amplitudeMod.get();
         }else {
-            return amplitude;
+            return amplitudeMod.get();
         }
     }
 
 
+
     public double getThreshold() {
-        return threshold;
+        return pulseWidthMod.get();
     }
 
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
+    public void setThresholdMod(ModulationInterface thresholdMod) {
+        this.pulseWidthMod = thresholdMod;
+    }
+
+    public ModulationInterface getThresholdMod() {
+        return pulseWidthMod;
     }
 
 
@@ -48,23 +50,24 @@ public class SquareOscillator extends Oscillator{
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SquareOscillator osc) {
-            return osc.frequency == this.frequency &&
-                    osc.amplitude == this.amplitude &&
+            return osc.frequencyMod == this.frequencyMod &&
+                    osc.amplitudeMod == this.amplitudeMod &&
                     osc.phase == this.phase &&
-                    osc.sampleRate == this.sampleRate;
+                    osc.sampleRate == this.sampleRate &&
+                    osc.pulseWidthMod == this.pulseWidthMod;
         }
         return false;
     }
 
     @Override
     public Generator clone() {
-        return new SquareOscillator(frequency, amplitude, phase, sampleRate, threshold);
+        return new SquareOscillator(frequencyMod, amplitudeMod, phase, sampleRate, pulseWidthMod);
     }
 
     @Override
     public String toString() {
-        return "Oscillator[Type=Square, Frequency="+ frequency
-                +", Amplitude="+ amplitude +", Phase="+ phase
-                +", SampleRate="+ sampleRate +", Threshold="+threshold+"]";
+        return "Oscillator[Type=Square, Frequency="+ frequencyMod.get()
+                +", Amplitude="+ amplitudeMod.get() +", Phase="+ phase
+                +", SampleRate="+ sampleRate +", Threshold="+pulseWidthMod.get()+"]";
     }
 }

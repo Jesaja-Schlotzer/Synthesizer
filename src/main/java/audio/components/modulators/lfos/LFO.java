@@ -1,19 +1,19 @@
 package audio.components.modulators.lfos;
 
-import audio.components.oscillators.Oscillator;
+import audio.components.oscillators.OldOscillator;
 import audio.interfaces.ModulationInterface;
 import audio.interfaces.Modulator;
 
 public class LFO implements Modulator {
 
-    private Oscillator oscillator;
+    private OldOscillator oscillator;
 
-    public LFO(Oscillator oscillator) {
+    public LFO(OldOscillator oscillator) {
         this.oscillator = oscillator;
     }
 
 
-    public Oscillator getOscillator() {
+    public OldOscillator getOscillator() {
         return oscillator;
     }
 

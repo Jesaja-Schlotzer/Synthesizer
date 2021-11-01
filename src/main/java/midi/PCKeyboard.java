@@ -2,11 +2,8 @@ package midi;
 
 import audio.components.Generator;
 import audio.components.combiners.Mixer;
-import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.modulators.envelopes.Envelope;
 import audio.components.oscillators.Oscillator;
-import audio.components.oscillators.modulated.ModulatedOscillator;
-import audio.interfaces.Modulator;
 import io.interfaces.Pressable;
 
 import javax.swing.*;
@@ -42,7 +39,7 @@ public class PCKeyboard extends Generator{
 
 
 
-    public PCKeyboard(ModulatedOscillator oscillator, Envelope envelope) {
+    public PCKeyboard(Oscillator oscillator, Envelope envelope) {
 
         keyToFreqMap.forEach((chr, key) -> key.setGenerator(oscillator.clone()));
         keyToFreqMap.forEach((chr, key) -> key.setEnvelope(envelope.clone()));

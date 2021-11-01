@@ -2,16 +2,13 @@ package main;
 
 import audio.Synthesizer;
 import audio.components.*;
-import audio.components.modulators.Modificator;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.modulators.lfos.LFO;
 import audio.components.oscillators.*;
-import audio.components.oscillators.modulated.ModulatedOscillator;
-import audio.components.oscillators.modulated.ModulatedSineOscillator;
-import audio.components.oscillators.modulated.ModulatedSquareOscillator;
+import audio.components.oscillators.Oscillator;
+import audio.components.oscillators.SineOscillator;
 import audio.interfaces.ModulationInterface;
 import io.AudioPlayer;
-import io.Microphone;
 import midi.PCKeyboard;
 
 import javax.sound.sampled.*;
@@ -77,10 +74,10 @@ public class Main {
         ADSREnvelope asdrEnv = new ADSREnvelope(3000, 6000, 0.4, 8000);
         ADSREnvelope asdrEnv2 = new ADSREnvelope(20000, 5000, 0.7, 20000);
 
-        LFO lfo = new LFO(new SineOscillator(3, 1, 0, 44100));
+        LFO lfo = new LFO(new OldSineOscillator(3, 1, 0, 44100));
 
 
-        ModulatedOscillator osc1 = new ModulatedSineOscillator(
+        Oscillator osc1 = new SineOscillator(
                 //asdrEnv.asInterface(261.63),
                 ModulationInterface.CONSTANT(261.63),
                 asdrEnv2.asInterface(64),
@@ -119,7 +116,7 @@ public class Main {
         /*  PC Keyboard  */
 
         PCKeyboard keyboard = new PCKeyboard(
-                new ModulatedSineOscillator(()->0, ()->64, 0, 44100),
+                new SineOscillator(()->0, ()->64, 0, 44100),
                 new ADSREnvelope(5000, 6000, 0.5, 10000)
                 );
 

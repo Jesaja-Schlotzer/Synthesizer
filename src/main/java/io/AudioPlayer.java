@@ -1,13 +1,8 @@
 package io;
 
-import audio.Synthesizer;
 import audio.components.Generator;
-import audio.components.oscillators.Oscillator;
-import audio.components.oscillators.SineOscillator;
-import main.Main;
 
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
