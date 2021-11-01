@@ -15,7 +15,7 @@ public class Modificator extends Generator {
 
     @Override
     public double next() {
-        return modulator.modulate(generator.next());
+        return modulator.modulate() * generator.next();
     }
 
     @Override

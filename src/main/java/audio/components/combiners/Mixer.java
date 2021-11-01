@@ -1,41 +1,48 @@
 package audio.components.combiners;
 
 import audio.components.Generator;
+import audio.modules.Module;
+import audio.modules.io.InputPort;
+import audio.modules.io.OutputPort;
+import audio.modules.io.Port;
 
-public class Mixer extends Generator{
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-    private Generator[] generators;
+public class Mixer extends Module{
 
-    public Mixer(Generator... generators) {
-        this.generators = generators;
+    @InputPort
+    private ArrayList<Port> inputPorts;
+
+
+    @OutputPort
+    private Port mainOutput;
+
+    public Port getMainOutput() {
+        return mainOutput;
     }
 
 
-    @Override
-    public double next() {
+    public Mixer(Port... ports) {
+        this.inputPorts = (ArrayList<Port>) Arrays.stream(ports).collect(Collectors.toList());
+
+        mainOutput = this::mix;
+    }
+
+
+    public void addPort(Port port) {
+        inputPorts.add(port);
+    }
+
+
+    public double mix() {
         double sum = 0;
 
-        for (Generator g : generators) {
-            sum += g.next();
+        for (Port port : inputPorts) {
+            sum += port.out();
         }
 
-        return sum / generators.length;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return null;
-    }
-
-
-    @Override
-    public Generator clone() {
-        Generator[] clonedGenerators = new Generator[generators.length];
-        for (int i = 0; i < generators.length; i++) {
-            clonedGenerators[i] = generators[i].clone();
-        }
-        return new Mixer(clonedGenerators);
+        return sum / inputPorts.size();
     }
 }

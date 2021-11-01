@@ -2,75 +2,80 @@ package audio.components.modulators.envelopes;
 
 import audio.interfaces.ModulationInterface;
 import audio.interfaces.Modulator;
-import io.interfaces.Pressable;
+import audio.modules.io.*;
 
-public class ADSREnvelope extends Envelope implements Modulator {
+public class ADSREnvelope extends Envelope implements Modulator{
+
+    private ModulationInterface attack; // TODO ModTntf. zu Port wechseln Ports sind der heiße Sch. Ja ja und so weiter
+    private ModulationInterface decay;
+    private ModulationInterface sustain;
+    private ModulationInterface release;
 
 
-    private double attack;
-    private double decay;
-    private double sustain;
-    private double release;
-
-    private double attackSlope;
-    private double decaySlope;
-    private double releaseSlope;
-    private double value;
-
-    private STAGE state;
+    private double lastTriggerSignal;
 
 
     public ADSREnvelope(double attack, double decay, double sustain, double release) {
-        this.attack = Math.max(attack, 0);
-        this.decay = Math.max(decay, 0);
-        this.sustain = Math.min(Math.max(sustain, 0), 1);
-        this.release = Math.max(release, 0);
-
-        attackSlope = 1 / attack;
-        decaySlope = -((1-sustain) / decay);
-        releaseSlope = -(sustain / release);
-
-        state = STAGE.NONE;
+        this(() -> Math.max(attack, 0), () -> Math.max(decay, 0), () -> Math.min(Math.max(sustain, 0), 1), () -> Math.max(release, 0));
     }
 
 
-    // TODO TODO TODO TODO !!! countedSamples von "ausen" geziehen (vielleicht als parameter durchreichen) so könnte Env an vielen Stellen gleichzeitig verwendet werden"
+    public ADSREnvelope(ModulationInterface attack, ModulationInterface decay, ModulationInterface sustain, ModulationInterface release) {
+        this.attack = attack;
+        this.decay = decay;
+        this.sustain = sustain;
+        this.release = release;
+
+        stage = STAGES.NONE;
+
+        triggerInput = Port.NULL;
+        mainInput = Port.NULL;
+
+        mainOutput = this::modulate;
+    }
+
+
 //TODO release wenn decay evtl. broken
 
-    @Override
-    public ModulationInterface asInterface(double in) {
-        return () -> this.modulate(in);
-    }
-
 
 
     @Override
-    public double modulate(double in) {
-        switch (state) {
+    public double modulate() {
+        if(lastTriggerSignal < triggerInput.out()) {
+            press();
+        }
+
+        if(lastTriggerSignal > triggerInput.out()) {
+            release();
+        }
+
+        lastTriggerSignal = triggerInput.out();
+
+        switch (stage) {
             case ATTACK:
-                value += attackSlope;
+                value += 1 / this.attack.get();
                 if(value >= 1) {
-                    state = STAGE.DECAY;
+                    stage = STAGES.DECAY;
                 }
-                return value * in;
+                return value  * mainInput.out();
 
             case DECAY:
-                value += decaySlope;
-                if(value <= sustain) {
-                    state = STAGE.SUSTAIN;
-                    value = sustain;
+                value -= (1-sustain.get()) / decay.get();
+                if(value <= sustain.get()) {
+                    stage = STAGES.SUSTAIN;
+                    value = sustain.get();
                 }
-                return value * in;
+                return value  * mainInput.out();
 
             case SUSTAIN:
-                return sustain * in;
+                return sustain.get() * mainInput.out();
 
             case RELEASE:
-                value += releaseSlope;
+                value -= sustain.get() / release.get();
                 if(value <= 0) {
-                    state = STAGE.NONE;
+                    stage = STAGES.NONE;
                 }
-                return value * in;
+                return value  * mainInput.out();
 
             default: // case NONE
                 return 0;
@@ -78,28 +83,30 @@ public class ADSREnvelope extends Envelope implements Modulator {
     }
 
 
+
     @Override
     public void press() {
-        if(attack > 0) {
-            state = STAGE.ATTACK;
+        if(attack.get() > 0) {
+            stage = STAGES.ATTACK;
             value = 0;
         }else {
             value = 1;
-            if(decay > 0) {
-                state = STAGE.DECAY;
+            if(decay.get() > 0) {
+                stage = STAGES.DECAY;
             }else {
-                value = sustain;
-                state = STAGE.SUSTAIN;
+                value = sustain.get();
+                stage = STAGES.SUSTAIN;
             }
         }
     }
 
+
     @Override
     public void release() {
-        if(state == STAGE.NONE) {
+        if(stage == STAGES.NONE) {
             return;
         }
-        state = STAGE.RELEASE;
+        stage = STAGES.RELEASE;
     }
 
 

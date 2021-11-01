@@ -9,6 +9,7 @@ public abstract class OldOscillator extends Generator {
     protected double phase;
     protected double sampleRate;
 
+    protected double t;
 
     public OldOscillator(double frequency, double amplitude, double phase, double sampleRate) {
         this.frequency = Math.max(frequency, 0);

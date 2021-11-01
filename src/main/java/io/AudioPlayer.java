@@ -1,6 +1,6 @@
 package io;
 
-import audio.components.Generator;
+import audio.modules.io.Port;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
@@ -13,7 +13,7 @@ public class AudioPlayer {
 
 
 
-    private Generator generator;
+    private Port output;
     private AudioFormat audioFormat;
     private InputStream audioInputStream;
     private SourceDataLine sourceDataLine;
@@ -25,8 +25,8 @@ public class AudioPlayer {
 
 
 
-    public AudioPlayer(Generator generator) {
-        this.generator = generator;
+    public AudioPlayer(Port output) {
+        this.output = output;
 
         sampleRate = 44100; // TODO später von Synth lesen
 
@@ -43,7 +43,7 @@ public class AudioPlayer {
 
     public void init() {
         try {
-            audioInputStream = new GeneratorInputStream(generator);
+            audioInputStream = new OutputToInputStream(output);
 
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 

@@ -1,21 +1,33 @@
 package audio.modules.controls;
 
-public class Dial<T extends Enum<T>> {
+import audio.enums.WaveForm;
 
-    Enum<T>[] options;
-    int selectedIndex;
+public class Dial<T> {
 
-    public Dial(Enum<T>... options) {
+    T[] options;
+    T selected;
+
+    @SafeVarargs
+    public Dial(T... options) {
         this.options = options;
+        this.selected = this.options[0];
     }
 
     public void select(int index) {
         if(index < options.length && index >= 0) {
-            selectedIndex = index;
+            selected = options[index];
         }
     }
 
-    public Enum<T> getSelected() {
-        return options[selectedIndex];
+    public void select(T selection) {
+        for (T t : options) {
+            if(t.equals(selection))
+                selected = selection;
+        }
+    }
+
+
+    public T getSelected() {
+        return selected;
     }
 }

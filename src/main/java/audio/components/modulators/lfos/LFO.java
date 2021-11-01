@@ -18,12 +18,8 @@ public class LFO implements Modulator {
     }
 
     @Override
-    public double modulate(double in) {
-        return oscillator.next() * in;
+    public double modulate() {
+        return oscillator.next();
     }
 
-    @Override
-    public ModulationInterface asInterface(double in) {
-        return () -> modulate(in);
-    }
 }

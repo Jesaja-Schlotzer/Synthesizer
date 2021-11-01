@@ -4,7 +4,6 @@ import audio.components.Generator;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Microphone extends Generator {
 

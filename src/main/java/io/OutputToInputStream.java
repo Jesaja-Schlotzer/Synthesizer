@@ -1,25 +1,25 @@
 package io;
 
-import audio.components.Generator;
+import audio.modules.io.Port;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 
-public class GeneratorInputStream extends InputStream {
+public class OutputToInputStream extends InputStream {
 
 
-    Generator generator;
+    Port output;
 
 
-    public GeneratorInputStream(Generator generator) {
-        this.generator = generator;
+    public OutputToInputStream(Port output) {
+        this.output = output;
     }
 
 
     @Override
     public int read() {
-        return (int) generator.next();
+        return (int) output.out();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class GeneratorInputStream extends InputStream {
     @Override
     public long skip(long n) throws IOException {
         for (long i = 0; i < n; i++) {
-            generator.next();
+            output.out();
         }
         return n;
     }
@@ -60,18 +60,17 @@ public class GeneratorInputStream extends InputStream {
     }
 
 
-    Generator markGenerator;
+    Port markOutput;
 
     @Override
     public synchronized void mark(int readlimit) {
-        markGenerator = (Generator) markGenerator.clone();
-        markGenerator.setT(markGenerator.getT());
+        markOutput = output;
     }
 
     @Override
     public synchronized void reset() throws IOException {
-        generator = markGenerator;
-        markGenerator = null;
+        output = markOutput;
+        markOutput = null;
     }
 
     @Override

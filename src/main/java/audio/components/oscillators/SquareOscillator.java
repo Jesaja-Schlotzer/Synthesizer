@@ -8,12 +8,12 @@ public class SquareOscillator extends Oscillator {
     private ModulationInterface pulseWidthMod = () -> 0.5;
 
 
-    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double phase, double sampleRate) {
-        super(frequencyMod, amplitudeMod, phase, sampleRate);
+    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate) {
+        super(frequencyMod, amplitudeMod, sampleRate);
     }
 
-    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double phase, double sampleRate, ModulationInterface pulseWidthMod) {
-        super(frequencyMod, amplitudeMod, phase, sampleRate);
+    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate, ModulationInterface pulseWidthMod) {
+        super(frequencyMod, amplitudeMod, sampleRate);
 
         this.pulseWidthMod = pulseWidthMod;
     }
@@ -22,7 +22,7 @@ public class SquareOscillator extends Oscillator {
 
     @Override
     public double next() {
-        double value = Math.sin(t + phase);
+        double value = Math.sin(t);
         t += (2 * Math.PI * frequencyMod.get()) / sampleRate;
         if(value < pulseWidthMod.get()) {
             return -amplitudeMod.get();
@@ -52,7 +52,6 @@ public class SquareOscillator extends Oscillator {
         if (obj instanceof SquareOscillator osc) {
             return osc.frequencyMod == this.frequencyMod &&
                     osc.amplitudeMod == this.amplitudeMod &&
-                    osc.phase == this.phase &&
                     osc.sampleRate == this.sampleRate &&
                     osc.pulseWidthMod == this.pulseWidthMod;
         }
@@ -61,13 +60,14 @@ public class SquareOscillator extends Oscillator {
 
     @Override
     public Generator clone() {
-        return new SquareOscillator(frequencyMod, amplitudeMod, phase, sampleRate, pulseWidthMod);
+        return new SquareOscillator(frequencyMod, amplitudeMod, sampleRate, pulseWidthMod);
     }
+
 
     @Override
     public String toString() {
         return "Oscillator[Type=Square, Frequency="+ frequencyMod.get()
-                +", Amplitude="+ amplitudeMod.get() +", Phase="+ phase
+                +", Amplitude="+ amplitudeMod.get()
                 +", SampleRate="+ sampleRate +", Threshold="+pulseWidthMod.get()+"]";
     }
 }

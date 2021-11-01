@@ -2,12 +2,16 @@ package main;
 
 import audio.Synthesizer;
 import audio.components.*;
+import audio.components.combiners.Mixer;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.modulators.lfos.LFO;
 import audio.components.oscillators.*;
 import audio.components.oscillators.Oscillator;
 import audio.components.oscillators.SineOscillator;
+import audio.enums.WaveForm;
 import audio.interfaces.ModulationInterface;
+import audio.modules.BasicADSRModule;
+import audio.modules.BasicOscillatorModule;
 import io.AudioPlayer;
 import midi.PCKeyboard;
 
@@ -71,66 +75,51 @@ public class Main {
 
 */
 
-        ADSREnvelope asdrEnv = new ADSREnvelope(3000, 6000, 0.4, 8000);
-        ADSREnvelope asdrEnv2 = new ADSREnvelope(20000, 5000, 0.7, 20000);
 
-        LFO lfo = new LFO(new OldSineOscillator(3, 1, 0, 44100));
+        SineOscillator osc1 = new SineOscillator(() -> 440, () -> 100,  44100);
+        SineOscillator osc2 = new SineOscillator(() -> 220, () -> 100, 44100);
 
-
-        Oscillator osc1 = new SineOscillator(
-                //asdrEnv.asInterface(261.63),
-                ModulationInterface.CONSTANT(261.63),
-                asdrEnv2.asInterface(64),
-                0,
-                44100);
+        //TODO Generator gen = new Mixer(osc1, osc2);
 
 
-        Generator gen = osc1;
 
-        gen.reset();
-
-        new Thread(() -> {
-            try {
-                asdrEnv.press();
-                asdrEnv2.press();
-                Thread.sleep(10);
-                asdrEnv.release();
-                asdrEnv2.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-        AudioPlayer ap = new AudioPlayer(new Synthesizer(gen));
+        AudioPlayer ap = new AudioPlayer(new Synthesizer(null));
 
         ap.init();
         ap.start();
         try {
-            Thread.sleep(2000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         ap.stop();
+        System.out.println("Audiowiedergabe gestoppt");
 
 
-        /*  PC Keyboard  */
+        /*  Modules  */
 
-        PCKeyboard keyboard = new PCKeyboard(
-                new SineOscillator(()->0, ()->64, 0, 44100),
-                new ADSREnvelope(5000, 6000, 0.5, 10000)
-                );
+        BasicOscillatorModule basicOscillatorModule = new BasicOscillatorModule();
+        BasicADSRModule basicADSRModule = new BasicADSRModule();
+        basicADSRModule.attackKnob.setValue(10000);
+        basicADSRModule.decayKnob.setValue(5000);
+        basicADSRModule.sustainKnob.setValue(0.3);
+        basicADSRModule.releaseKnob.setValue(2000);
+
+        PCKeyboard keyboard = new PCKeyboard();
 
 
-        AudioPlayer ap2 = new AudioPlayer(keyboard.getOutputGenerator());
+        basicOscillatorModule.setWaveForm(WaveForm.SQUARE);
+        basicOscillatorModule.setFrequencyInput(keyboard.mainOutput);
 
-        ap2.init();
-        ap2.start();
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //ap2.stop();
+        basicADSRModule.setTriggerInput(keyboard.keyPressedOutput);
+        basicADSRModule.setMainInput(basicOscillatorModule.getMainOutput());
+
+        AudioPlayer audioPlayer = new AudioPlayer(basicADSRModule.getMainOutput());
+
+        audioPlayer.init();
+        audioPlayer.start();
+        //Thread.sleep(20000);
+        //audioPlayer.stop();
 
 /*                      Microphone
         try {

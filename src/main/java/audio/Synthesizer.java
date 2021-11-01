@@ -1,8 +1,9 @@
 package audio;
 
 import audio.components.Generator;
+import audio.modules.io.Port;
 
-public class Synthesizer extends Generator {
+public class Synthesizer extends Generator implements Port {
 
 
     private Generator generator;
@@ -11,6 +12,11 @@ public class Synthesizer extends Generator {
         this.generator = generator;
     }
 
+
+    @Override
+    public double out() {
+        return generator.next();
+    }
 
 
     @Override
@@ -29,4 +35,5 @@ public class Synthesizer extends Generator {
     public Generator clone() {
         return new Synthesizer(generator.clone());
     }
+
 }

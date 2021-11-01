@@ -6,14 +6,14 @@ import audio.interfaces.ModulationInterface;
 public class SineOscillator extends Oscillator {
 
 
-    public SineOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double phase, double sampleRate) {
-        super(frequencyMod, amplitudeMod, phase, sampleRate);
+    public SineOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate) {
+        super(frequencyMod, amplitudeMod, sampleRate);
     }
 
 
 
     public double next() {
-        double value = Math.sin(t + phase);
+        double value = Math.sin(t);
         t += (2 * Math.PI * frequencyMod.get()) / sampleRate;
         return value * amplitudeMod.get();
     }
@@ -25,7 +25,6 @@ public class SineOscillator extends Oscillator {
         if (obj instanceof SineOscillator osc) {
             return osc.frequencyMod == this.frequencyMod &&
                     osc.amplitudeMod == this.amplitudeMod &&
-                    osc.phase == this.phase &&
                     osc.sampleRate == this.sampleRate;
         }
         return false;
@@ -33,13 +32,15 @@ public class SineOscillator extends Oscillator {
 
     @Override
     public Generator clone() {
-        return new SineOscillator(frequencyMod, amplitudeMod, phase, sampleRate);
+        return new SineOscillator(frequencyMod, amplitudeMod, sampleRate);
     }
+
+
 
     @Override
     public String toString() {
         return "Oscillator[Type=Sine, Frequency="+ frequencyMod.get()
-                +", Amplitude="+ amplitudeMod.get() +", Phase="+ phase
+                +", Amplitude="+ amplitudeMod.get()
                 +", SampleRate="+ sampleRate +"]";
     }
 }

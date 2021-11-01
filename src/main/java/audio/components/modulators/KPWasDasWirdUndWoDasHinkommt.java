@@ -5,13 +5,8 @@ import audio.interfaces.Modulator;
 
 public class KPWasDasWirdUndWoDasHinkommt implements Modulator {
     @Override
-    public double modulate(double input) {
+    public double modulate() {
         return 0;
-    }
-
-    @Override
-    public ModulationInterface asInterface(double in) {
-        return () -> this.modulate(in);
     }
 
     /*  TODO Modulatoren die nur z.B den Wert der reinkommt * 0.75 nehmen
