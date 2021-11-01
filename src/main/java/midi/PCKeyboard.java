@@ -1,5 +1,6 @@
 package midi;
 
+import audio.modules.io.OutputPort;
 import audio.modules.io.Port;
 
 
@@ -26,14 +27,27 @@ public class PCKeyboard{
     }};
 
 
-    public Port mainOutput;
-    public Port keyPressedOutput;
+
+    @OutputPort
+    private Port mainOutput;
+
+    public Port getMainOutput() {
+        return mainOutput;
+    }
+
+
+    @OutputPort
+    private Port keyPressedOutput;
+
+    public Port getKeyPressedOutput() {
+        return keyPressedOutput;
+    }
+
 
     private int keyPressed;
 
     private int octave = 3;
     private double frequency;
-
 
 
     public PCKeyboard() {

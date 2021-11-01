@@ -83,7 +83,7 @@ public class Main {
 
 
 
-        AudioPlayer ap = new AudioPlayer(new Synthesizer(null));
+        /*AudioPlayer ap = new AudioPlayer(new Synthesizer(null));
 
         ap.init();
         ap.start();
@@ -94,27 +94,20 @@ public class Main {
         }
         ap.stop();
         System.out.println("Audiowiedergabe gestoppt");
-
+*/
 
         /*  Modules  */
 
         BasicOscillatorModule basicOscillatorModule = new BasicOscillatorModule();
-        BasicADSRModule basicADSRModule = new BasicADSRModule();
-        basicADSRModule.attackKnob.setValue(10000);
-        basicADSRModule.decayKnob.setValue(5000);
-        basicADSRModule.sustainKnob.setValue(0.3);
-        basicADSRModule.releaseKnob.setValue(2000);
 
         PCKeyboard keyboard = new PCKeyboard();
 
 
-        basicOscillatorModule.setWaveForm(WaveForm.SQUARE);
-        basicOscillatorModule.setFrequencyInput(keyboard.mainOutput);
+        basicOscillatorModule.setWaveForm(WaveForm.SINE);
+        basicOscillatorModule.setFrequencyInput(keyboard.getMainOutput());
 
-        basicADSRModule.setTriggerInput(keyboard.keyPressedOutput);
-        basicADSRModule.setMainInput(basicOscillatorModule.getMainOutput());
 
-        AudioPlayer audioPlayer = new AudioPlayer(basicADSRModule.getMainOutput());
+        AudioPlayer audioPlayer = new AudioPlayer(keyboard.getMainOutput());
 
         audioPlayer.init();
         audioPlayer.start();
