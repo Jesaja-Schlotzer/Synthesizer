@@ -88,7 +88,7 @@ public class PCKeyboardOscillatorModule {
                     e.setValue(new KeyPort());
 
                 } case SQUARE -> {
-                    oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100);
+                    oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100, () -> 0.5);
                     e.setValue(new KeyPort());
 
                 } case SAWTOOTH -> {
@@ -152,12 +152,12 @@ public class PCKeyboardOscillatorModule {
 
     public static void main(String[] args) {
 
-        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.TRIANGLE);
+        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SAWTOOTH);
 
-        module.attackKnob.setValue(1000);
-        module.decayKnob.setValue(4000);
-        module.sustainKnob.setValue(0.7);
-        module.releaseKnob.setValue(1000);
+        module.attackKnob.setValue(10000);
+        module.decayKnob.setValue(0);
+        module.sustainKnob.setValue(0.8);
+        module.releaseKnob.setValue(40000);
 
 
         AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutput());
