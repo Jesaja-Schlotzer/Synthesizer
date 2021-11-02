@@ -102,14 +102,14 @@ public class PCKeyboardOscillatorModule {
                 }
             }
 
-            adsrEnvelope.setMainInput(oscillator::next);//() -> 100);
-            adsrEnvelope.setTriggerInput(e.getValue().keyPressedOutput);
+            adsrEnvelope.setMainInputPort(oscillator.getMainOutput());//() -> 100);
+            adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutput);
 
-            mixer.addPort(adsrEnvelope.getMainOutput());//oscillator::next);
+            mixer.addInputPort(adsrEnvelope.getMainOutputPort());//oscillator::next);
 
         }
 
-        mainOutput = mixer::mix;
+        mainOutput = mixer.getMainOutputPort();
 
 
         JFrame frame = new JFrame();
@@ -145,6 +145,9 @@ public class PCKeyboardOscillatorModule {
         private int keyPressed;
         private final Port keyPressedOutput = () -> keyPressed;
     }
+
+
+
 
 
     public static void main(String[] args) {

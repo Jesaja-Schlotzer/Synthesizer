@@ -1,46 +1,47 @@
 package audio.components.combiners;
 
-import audio.components.Generator;
-import audio.modules.Module;
-import audio.modules.io.InputPort;
-import audio.modules.io.OutputPort;
-import audio.modules.io.Port;
+import audio.modules.io.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Mixer extends Module{
+public class Mixer{
 
     @InputPort
     private ArrayList<Port> inputPorts;
 
 
     @OutputPort
-    private Port mainOutput;
+    private final Port mainOutputPort = this::mix;
 
-    public Port getMainOutput() {
-        return mainOutput;
+    public Port getMainOutputPort() {
+        return mainOutputPort;
     }
 
 
-    public Mixer(Port... ports) {
-        this.inputPorts = (ArrayList<Port>) Arrays.stream(ports).collect(Collectors.toList());
-
-        mainOutput = this::mix;
+    public Mixer(Port... inputPorts) {
+        this.inputPorts = (ArrayList<Port>) Arrays.stream(inputPorts).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 
-    public void addPort(Port port) {
-        inputPorts.add(port);
+    public void addInputPort(Port inputPort) {
+        if(inputPort != null) {
+            inputPorts.add(inputPort);
+        }
     }
 
 
-    public double mix() {
+    private double mix() {
         double sum = 0;
 
         for (Port port : inputPorts) {
             sum += port.out();
+        }
+
+        if(sum == 0){
+            return 0;
         }
 
         return sum / inputPorts.size();

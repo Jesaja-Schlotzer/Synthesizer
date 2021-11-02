@@ -1,15 +1,9 @@
 package main;
 
 import audio.Synthesizer;
-import audio.components.*;
-import audio.components.combiners.Mixer;
-import audio.components.modulators.envelopes.ADSREnvelope;
-import audio.components.modulators.lfos.LFO;
-import audio.components.oscillators.*;
 import audio.components.oscillators.Oscillator;
 import audio.components.oscillators.SineOscillator;
 import audio.enums.WaveForm;
-import audio.interfaces.ModulationInterface;
 import audio.modules.BasicADSRModule;
 import audio.modules.BasicOscillatorModule;
 import io.AudioPlayer;
@@ -120,6 +114,21 @@ public class Main {
         audioPlayer.start();
         //Thread.sleep(20000);
         //audioPlayer.stop();
+
+
+
+        Oscillator timeTestOsc = new SineOscillator(() -> 440, () -> 100, 44100);
+
+        long time = System.nanoTime();
+
+        for (int i = 0; i < 44100; i++) {
+            timeTestOsc.getMainOutput().out();
+        }
+
+        System.out.println(System.nanoTime() - time);
+
+
+        // TODO AudioPlayer mal einfach nur eine Zahl füttern oder andere potenziell lustige Dinge
 
 /*                      Microphone
         try {

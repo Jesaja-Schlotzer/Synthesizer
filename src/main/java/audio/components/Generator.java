@@ -3,7 +3,7 @@ package audio.components;
 
 public abstract class Generator {
 
-    public abstract double next();
+    protected abstract double next();
 
 
     public abstract String toString();

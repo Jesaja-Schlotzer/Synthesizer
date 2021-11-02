@@ -1,45 +1,49 @@
 package audio.components.modulators.envelopes;
 
-import audio.interfaces.Modulator;
-import audio.modules.io.InputPort;
-import audio.modules.io.OutputPort;
-import audio.modules.io.Port;
+import audio.modules.io.*;
 import io.interfaces.Pressable;
 
-public abstract class Envelope implements Modulator, Pressable {
+public abstract class Envelope implements Pressable {
 
-    enum STAGES {
+    protected enum STAGES {
         NONE, ATTACK, DECAY, SUSTAIN, RELEASE, HOLD, DELAY
     }
 
 
     @InputPort
-    protected Port mainInput;
+    protected Port mainInputPort = Port.NULL;
 
-    public void setMainInput(Port mainInput) {
-        this.mainInput = mainInput;
+    public void setMainInputPort(Port mainInputPort) {
+        if(mainInputPort != null) {
+            this.mainInputPort = mainInputPort;
+        }
     }
 
 
     @InputPort
-    protected Port triggerInput;
+    protected Port triggerInputPort = Port.NULL;
 
-    public void setTriggerInput(Port triggerInput) {
-        this.triggerInput = triggerInput;
+    public void setTriggerInputPort(Port triggerInputPort) {
+        if(triggerInputPort != null) {
+            this.triggerInputPort = triggerInputPort;
+        }
     }
 
 
 
     @OutputPort
-    protected Port mainOutput;
+    protected final Port mainOutputPort = this::modulate;
 
-    public Port getMainOutput() {
-        return mainOutput;
+    public Port getMainOutputPort() {
+        return mainOutputPort;
     }
 
 
     protected double value;
     protected STAGES stage;
+
+
+    protected abstract double modulate();
 
 
     public abstract String toString();

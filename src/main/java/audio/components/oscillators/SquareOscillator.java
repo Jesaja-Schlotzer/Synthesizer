@@ -1,73 +1,77 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
-import audio.interfaces.ModulationInterface;
+import audio.modules.io.InputPort;
+import audio.modules.io.Port;
 
 public class SquareOscillator extends Oscillator {
 
-    private ModulationInterface pulseWidthMod = () -> 0.5;
+    @InputPort
+    private Port pulseWidthInputPort = () -> 0.5;
 
-
-    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate) {
-        super(frequencyMod, amplitudeMod, sampleRate);
+    public void setPulseWidthInputPort(Port pulseWidthInputPort) {
+        this.pulseWidthInputPort = pulseWidthInputPort;
     }
 
-    public SquareOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate, ModulationInterface pulseWidthMod) {
-        super(frequencyMod, amplitudeMod, sampleRate);
 
-        this.pulseWidthMod = pulseWidthMod;
+    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+        super(frequencyInputPort, amplitudeInputPort, sampleRate);
+    }
+
+    public SquareOscillator(double frequency, double amplitude, double sampleRate) {
+        super(frequency, amplitude, sampleRate);
+    }
+
+    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate, Port pulseWidthInputPort) {
+        super(frequencyInputPort, amplitudeInputPort, sampleRate);
+
+        this.pulseWidthInputPort = pulseWidthInputPort;
+    }
+
+    public SquareOscillator(double frequency, double amplitude, double sampleRate, double pulseWidth) {
+        super(frequency, amplitude, sampleRate);
+
+        this.pulseWidthInputPort = () -> pulseWidth;
     }
 
 
 
     @Override
-    public double next() {
-        double value = Math.sin(t);
-        t += (2 * Math.PI * frequencyMod.get()) / sampleRate;
-        if(value < pulseWidthMod.get()) {
-            return -amplitudeMod.get();
+    protected double next() {
+        if(Math.sin(t) < pulseWidthInputPort.out()) {
+            t += (2 * Math.PI * frequencyInputPort.out()) / sampleRate;
+            return -amplitudeInputPort.out();
         }else {
-            return amplitudeMod.get();
+            t += (2 * Math.PI * frequencyInputPort.out()) / sampleRate;
+            return amplitudeInputPort.out();
         }
     }
 
-
-
-    public double getThreshold() {
-        return pulseWidthMod.get();
-    }
-
-    public void setThresholdMod(ModulationInterface thresholdMod) {
-        this.pulseWidthMod = thresholdMod;
-    }
-
-    public ModulationInterface getThresholdMod() {
-        return pulseWidthMod;
-    }
 
 
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SquareOscillator osc) {
-            return osc.frequencyMod == this.frequencyMod &&
-                    osc.amplitudeMod == this.amplitudeMod &&
+            return osc.frequencyInputPort == this.frequencyInputPort &&
+                    osc.amplitudeInputPort == this.amplitudeInputPort &&
                     osc.sampleRate == this.sampleRate &&
-                    osc.pulseWidthMod == this.pulseWidthMod;
+                    osc.pulseWidthInputPort == this.pulseWidthInputPort;
         }
         return false;
     }
 
+
     @Override
     public Generator clone() {
-        return new SquareOscillator(frequencyMod, amplitudeMod, sampleRate, pulseWidthMod);
+        return new SquareOscillator(frequencyInputPort, amplitudeInputPort, sampleRate, pulseWidthInputPort);
     }
 
 
     @Override
     public String toString() {
-        return "Oscillator[Type=Square, Frequency="+ frequencyMod.get()
-                +", Amplitude="+ amplitudeMod.get()
-                +", SampleRate="+ sampleRate +", Threshold="+pulseWidthMod.get()+"]";
+        return "Oscillator[Type=Square, Frequency="+ frequencyInputPort.out()
+                +", Amplitude="+ amplitudeInputPort.out()
+                +", SampleRate="+ sampleRate +", Threshold="+pulseWidthInputPort.out()+"]";
     }
 }

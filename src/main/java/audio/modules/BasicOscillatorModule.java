@@ -1,10 +1,9 @@
 package audio.modules;
 
+import audio.components.combiners.Mixer;
 import audio.components.oscillators.*;
 import audio.enums.WaveForm;
-import audio.modules.io.InputPort;
-import audio.modules.io.OutputPort;
-import audio.modules.io.Port;
+import audio.modules.io.*;
 import audio.modules.controls.*;
 
 import java.util.HashMap;
@@ -47,8 +46,9 @@ public class BasicOscillatorModule extends Module {
         oscillatorMap.put(WaveForm.SAWTOOTH, sawtoothOscillator);
         oscillatorMap.put(WaveForm.TRIANGLE, triangleOscillator);
 
+        Mixer mixer = new Mixer(sineOscillator.getMainOutput(), squareOscillator.getMainOutput(), sawtoothOscillator.getMainOutput(), triangleOscillator.getMainOutput());
 
-        mainOutput = () -> oscillatorMap.get(waveFormDial.getSelected()).next();
+        mainOutput = mixer.getMainOutputPort();
     }
 
 

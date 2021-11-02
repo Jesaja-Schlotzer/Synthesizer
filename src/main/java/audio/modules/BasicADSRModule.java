@@ -25,7 +25,7 @@ public class BasicADSRModule {
 
 
     @OutputPort
-    private Port mainOutput;
+    private final Port mainOutput;
 
     public Port getMainOutput() {
         return mainOutput;
@@ -41,11 +41,11 @@ public class BasicADSRModule {
 
         adsrEnvelope = new ADSREnvelope(attackKnob::getValue, decayKnob::getValue, sustainKnob::getValue, releaseKnob::getValue);
 
-        mainOutput = adsrEnvelope::modulate;
+        mainOutput = adsrEnvelope.getMainOutputPort();
     }
 
 
     public void setTriggerInput(Port triggerInput) {
-        adsrEnvelope.setTriggerInput(triggerInput);
+        adsrEnvelope.setTriggerInputPort(triggerInput);
     }
 }

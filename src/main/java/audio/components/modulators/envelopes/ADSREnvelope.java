@@ -1,81 +1,118 @@
 package audio.components.modulators.envelopes;
 
-import audio.interfaces.ModulationInterface;
-import audio.interfaces.Modulator;
 import audio.modules.io.*;
 
-public class ADSREnvelope extends Envelope implements Modulator{
+public class ADSREnvelope extends Envelope{
 
-    private ModulationInterface attack; // TODO ModTntf. zu Port wechseln Ports sind der heiße Sch. Ja ja und so weiter
-    private ModulationInterface decay;
-    private ModulationInterface sustain;
-    private ModulationInterface release;
+    @InputPort
+    private Port attackInputPort = Port.NULL;
+
+    public void setAttackInputPort(Port attackInputPort) {
+        if(attackInputPort != null) {
+            this.attackInputPort = () -> Math.max(attackInputPort.out(), 0);
+        }
+    }
+
+
+    @InputPort
+    private Port decayInputPort = Port.ONE;
+
+    public void setDecayInputPort(Port decayInputPort) {
+        if(decayInputPort != null) {
+            this.decayInputPort = () -> Math.max(decayInputPort.out(), 1);
+        }
+    }
+
+
+    @InputPort
+    private Port sustainInputPort = Port.ONE;
+
+    public void setSustainInputPort(Port sustainInputPort) {
+        if(sustainInputPort != null) {
+            this.sustainInputPort = () -> Math.min(Math.max(sustainInputPort.out(), 0), 1);
+        }
+    }
+
+
+    @InputPort
+    private Port releaseInputPort = Port.ONE;
+
+    public void setReleaseInputPort(Port releaseInputPort) {
+        if(releaseInputPort != null) {
+            this.releaseInputPort = () -> Math.max(releaseInputPort.out(), 1);
+        }
+    }
 
 
     private double lastTriggerSignal;
 
 
-    public ADSREnvelope(double attack, double decay, double sustain, double release) {
-        this(() -> Math.max(attack, 0), () -> Math.max(decay, 0), () -> Math.min(Math.max(sustain, 0), 1), () -> Math.max(release, 0));
-    }
-
-
-    public ADSREnvelope(ModulationInterface attack, ModulationInterface decay, ModulationInterface sustain, ModulationInterface release) {
-        this.attack = attack;
-        this.decay = decay;
-        this.sustain = sustain;
-        this.release = release;
+    public ADSREnvelope(Port attackInputPort, Port decayInputPort, Port sustainInputPort, Port releaseInputPort) {
+        setAttackInputPort(attackInputPort);
+        setDecayInputPort(decayInputPort);
+        setSustainInputPort(sustainInputPort);
+        setReleaseInputPort(releaseInputPort);
 
         stage = STAGES.NONE;
-
-        triggerInput = Port.NULL;
-        mainInput = Port.NULL;
-
-        mainOutput = this::modulate;
     }
 
 
-//TODO release wenn decay evtl. broken
+    public ADSREnvelope(double attack, double decay, double sustain, double release) {
+        attackInputPort =  (attack  >= 0 ? () -> attack  : Port.NULL);
+        decayInputPort =   (decay   >= 1 ? () -> decay   : Port.ONE);
+        sustainInputPort = (sustain >= 0 && sustain <= 1 ? () -> sustain : Port.ONE);
+        releaseInputPort = (release >= 1 ? () -> release : Port.ONE);
+
+        stage = STAGES.NONE;
+    }
+
+
+    private ADSREnvelope(ADSREnvelope adsrEnvelope) {
+        this.attackInputPort =  adsrEnvelope.attackInputPort;
+        this.decayInputPort =   adsrEnvelope.decayInputPort;
+        this.sustainInputPort = adsrEnvelope.sustainInputPort;
+        this.releaseInputPort = adsrEnvelope.releaseInputPort;
+    }
 
 
 
     @Override
-    public double modulate() {
-        if(lastTriggerSignal < triggerInput.out()) {
+    protected double modulate() {
+        if(lastTriggerSignal < triggerInputPort.out()) {
+            lastTriggerSignal = triggerInputPort.out();
             press();
-        }
-
-        if(lastTriggerSignal > triggerInput.out()) {
+        }else if(lastTriggerSignal > triggerInputPort.out()) {
+            lastTriggerSignal = triggerInputPort.out();
             release();
         }
 
-        lastTriggerSignal = triggerInput.out();
-
         switch (stage) {
             case ATTACK:
-                value += 1 / this.attack.get();
+                value += 1 / attackInputPort.out();
                 if(value >= 1) {
+                    value = 1;
                     stage = STAGES.DECAY;
                 }
-                return value  * mainInput.out();
+                return value * mainInputPort.out();
 
             case DECAY:
-                value -= (1-sustain.get()) / decay.get();
-                if(value <= sustain.get()) {
+                value -= (1-sustainInputPort.out()) / decayInputPort.out();
+                if(value <= sustainInputPort.out()) {
+                    value = sustainInputPort.out();
                     stage = STAGES.SUSTAIN;
-                    value = sustain.get();
                 }
-                return value  * mainInput.out();
+                return value * mainInputPort.out();
 
             case SUSTAIN:
-                return sustain.get() * mainInput.out();
+                return sustainInputPort.out() * mainInputPort.out();
 
             case RELEASE:
-                value -= sustain.get() / release.get();
+                value -= sustainInputPort.out() / releaseInputPort.out();
                 if(value <= 0) {
+                    value = 0;
                     stage = STAGES.NONE;
                 }
-                return value  * mainInput.out();
+                return value * mainInputPort.out();
 
             default: // case NONE
                 return 0;
@@ -86,39 +123,24 @@ public class ADSREnvelope extends Envelope implements Modulator{
 
     @Override
     public void press() {
-        if(attack.get() > 0) {
-            stage = STAGES.ATTACK;
-            value = 0;
-        }else {
-            value = 1;
-            if(decay.get() > 0) {
-                stage = STAGES.DECAY;
-            }else {
-                value = sustain.get();
-                stage = STAGES.SUSTAIN;
-            }
-        }
+        stage = STAGES.ATTACK;
     }
 
 
     @Override
     public void release() {
-        if(stage == STAGES.NONE) {
-            return;
-        }
         stage = STAGES.RELEASE;
     }
 
 
 
-
     @Override
     public String toString() {
-        return "Envelope[Type=ADSR, Attack="+attack+", Decay="+decay+", Sustain="+sustain+", Release="+release+"]";
+        return "Envelope[Type=ADSR, Attack="+attackInputPort.out()+", Decay="+decayInputPort.out()+", Sustain="+ sustainInputPort.out()+", Release="+ releaseInputPort.out()+"]";
     }
 
     @Override
     public Envelope clone() {
-        return new ADSREnvelope(attack, decay, sustain, release);
+        return new ADSREnvelope(this);
     }
 }

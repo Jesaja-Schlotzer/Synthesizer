@@ -1,21 +1,55 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
-import audio.interfaces.ModulationInterface;
+import audio.modules.io.*;
 
 public abstract class Oscillator extends Generator {
 
-    protected ModulationInterface frequencyMod; // TODO ModInterface weg damit, Port ist der neue Scheiss
-    protected ModulationInterface amplitudeMod;
+    @InputPort
+    protected Port frequencyInputPort = Port.NULL;
+
+    public void setFrequencyInputPort(Port frequencyInputPort) {
+        if(frequencyInputPort != null) {
+            this.frequencyInputPort = frequencyInputPort;
+        }
+    }
+
+
+    @InputPort
+    protected Port amplitudeInputPort = Port.NULL;
+
+    public void setAmplitudeInputPort(Port amplitudeInputPort) {
+        if(amplitudeInputPort != null) {
+            this.amplitudeInputPort = amplitudeInputPort;
+        }
+    }
+
+
+
+    @OutputPort
+    protected final Port mainOutput = this::next;
+
+    public Port getMainOutput() {
+        return mainOutput;
+    }
+
+
+
     protected double sampleRate;
     protected double t = 0;
 
-    public Oscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate) {
-        this.frequencyMod = frequencyMod;
-        this.amplitudeMod = amplitudeMod;
-        this.sampleRate = sampleRate;
 
-        this.t = 0;
+    public Oscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+        setFrequencyInputPort(frequencyInputPort);
+        setAmplitudeInputPort(amplitudeInputPort);
+        this.sampleRate = sampleRate;
+    }
+
+
+    public Oscillator(double frequency, double amplitude, double sampleRate) {
+        frequencyInputPort = (frequency >= 0 ? () -> frequency : Port.NULL);
+        amplitudeInputPort = (amplitude >= 0 ? () -> amplitude : Port.NULL);
+        this.sampleRate = sampleRate;
     }
 
 
@@ -30,38 +64,5 @@ public abstract class Oscillator extends Generator {
 
     public void setT(double t) {
         this.t = t;
-    }
-
-
-
-    public ModulationInterface getFrequencyMod() {
-        return frequencyMod;
-    }
-
-    public void setFrequencyMod(ModulationInterface frequencyMod) {
-        this.frequencyMod = frequencyMod;
-    }
-
-
-    public ModulationInterface getAmplitudeMod() {
-        return amplitudeMod;
-    }
-
-    public void setAmplitudeMod(ModulationInterface amplitudeMod) {
-        this.amplitudeMod = amplitudeMod;
-    }
-
-
-
-    public double getFrequency() {
-        return frequencyMod.get();
-    }
-
-    public double getAmplitude() {
-        return amplitudeMod.get();
-    }
-
-    public double getSampleRate() {
-        return sampleRate;
     }
 }

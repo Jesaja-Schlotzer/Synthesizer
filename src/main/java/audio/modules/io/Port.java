@@ -15,6 +15,7 @@ package audio.modules.io;
 public interface Port {
 
     Port NULL = () -> 0;
+    Port ONE = () -> 1;
 
     double out();
 

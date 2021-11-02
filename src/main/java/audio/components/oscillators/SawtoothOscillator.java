@@ -1,25 +1,27 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
-import audio.interfaces.ModulationInterface;
+import audio.modules.io.Port;
 
 public class SawtoothOscillator extends Oscillator {
 
-    private double period;
 
-    public SawtoothOscillator(ModulationInterface frequencyMod, ModulationInterface amplitudeMod, double sampleRate) {
-        super(frequencyMod, amplitudeMod, sampleRate);
+    public SawtoothOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+        super(frequencyInputPort, amplitudeInputPort, sampleRate);
+    }
+
+    public SawtoothOscillator(double frequency, double amplitude, double sampleRate) {
+        super(frequency, amplitude, sampleRate);
     }
 
 
-    @Override
-    public double next() {
-        period = sampleRate / frequencyMod.get();
 
-        double div = t / period;
+    @Override
+    protected double next() {
+        double div = t / (sampleRate / frequencyInputPort.out());
         double val = 2 * (div - Math.floor(0.5 + div));
         t++;
-        return val * amplitudeMod.get();
+        return val * amplitudeInputPort.out();
     }
 
 
@@ -28,25 +30,24 @@ public class SawtoothOscillator extends Oscillator {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SawtoothOscillator osc) {
-            return osc.frequencyMod == this.frequencyMod &&
-                    osc.amplitudeMod == this.amplitudeMod &&
-                    osc.sampleRate == this.sampleRate &&
-                    osc.period == this.period;
+            return osc.frequencyInputPort == this.frequencyInputPort &&
+                   osc.amplitudeInputPort == this.amplitudeInputPort &&
+                   osc.sampleRate == this.sampleRate;
         }
         return false;
     }
 
+
     @Override
     public Generator clone(){
-        return new SawtoothOscillator(frequencyMod, amplitudeMod, sampleRate);
+        return new SawtoothOscillator(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
-
 
 
     @Override
     public String toString() {
-        return "Oscillator[Type=Sawtooth, Frequency="+ frequencyMod.get()
-                +", Amplitude="+ amplitudeMod.get()
+        return "Oscillator[Type=Sawtooth, Frequency="+ frequencyInputPort.out()
+                +", Amplitude="+ amplitudeInputPort.out()
                 +", SampleRate="+ sampleRate +"]";
     }
 }
