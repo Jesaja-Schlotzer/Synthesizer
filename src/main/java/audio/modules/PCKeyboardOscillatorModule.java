@@ -1,6 +1,7 @@
 package audio.modules;
 
 import audio.components.combiners.Mixer;
+import audio.components.filters.RCLowPassFilter;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.oscillators.*;
 import audio.enums.SampleRate;
@@ -98,7 +99,11 @@ public class PCKeyboardOscillatorModule {
             mixer.addInputPort(adsrEnvelope.getMainOutputPort());
         }
 
-        mainOutputPort = mixer.getMainOutputPort();
+        RCLowPassFilter rcLowPassFilter = new RCLowPassFilter(0, SampleRate._44100);
+
+        rcLowPassFilter.setInputPort(mixer.getMainOutputPort());
+
+        mainOutputPort = rcLowPassFilter.getOutputPort();
 
 
         JFrame frame = new JFrame();
@@ -143,12 +148,12 @@ public class PCKeyboardOscillatorModule {
 
     public static void main(String[] args) {
 
-        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SQUARE);
+        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SINE);
 
         module.attackKnob.setValue(5000);
         module.decayKnob.setValue(0);
         module.sustainKnob.setValue(0.8);
-        module.releaseKnob.setValue(40000);
+        module.releaseKnob.setValue(20000);
 
 
         AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
