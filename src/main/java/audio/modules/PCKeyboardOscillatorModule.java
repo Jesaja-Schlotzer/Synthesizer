@@ -3,6 +3,7 @@ package audio.modules;
 import audio.components.combiners.Mixer;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.oscillators.*;
+import audio.enums.SampleRate;
 import audio.enums.WaveForm;
 import audio.modules.controls.ControlKnob;
 import audio.modules.io.OutputPort;
@@ -33,7 +34,7 @@ public class PCKeyboardOscillatorModule {
     }};
 
 
-    private Map<Character, KeyPort> keyPortMap = new HashMap<>(){{
+    private final Map<Character, KeyPort> keyPortMap = new HashMap<>(){{
         put('y', null); // C
         put('s', null); // C#
         put('x', null); // D
@@ -57,10 +58,10 @@ public class PCKeyboardOscillatorModule {
 
 
     @OutputPort
-    private Port mainOutput;
+    private final Port mainOutputPort;
 
-    public Port getMainOutput() {
-        return mainOutput;
+    public Port getMainOutputPort() {
+        return mainOutputPort;
     }
 
 
@@ -69,7 +70,7 @@ public class PCKeyboardOscillatorModule {
 
 
 
-    public PCKeyboardOscillatorModule(WaveForm oscillatorType) { // TODO TODO Input Port (von alles) in Konstruktor packen (weil wieso nicht) gerade bei Envelope ganz praktisch
+    public PCKeyboardOscillatorModule(WaveForm waveForm) { // TODO TODO Input Port (von alles) in Konstruktor packen (weil wieso nicht) gerade bei Envelope ganz praktisch
         attackKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
         decayKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
         sustainKnob = new ControlKnob(ControlKnob.ZERO_TO_ONE);
@@ -82,34 +83,22 @@ public class PCKeyboardOscillatorModule {
 
             Oscillator oscillator = null;
 
-            switch (oscillatorType) {
-                case SINE -> {
-                    oscillator = new SineOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100);
-                    e.setValue(new KeyPort());
-
-                } case SQUARE -> {
-                    oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100, () -> 0.5);
-                    e.setValue(new KeyPort());
-
-                } case SAWTOOTH -> {
-                    oscillator = new SawtoothOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100);
-                    e.setValue(new KeyPort());
-
-                } case TRIANGLE -> {
-                    oscillator = new TriangleOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100/*adsrEnvelope::modulate*/, 44100);
-                    e.setValue(new KeyPort());
-
-                }
+            switch (waveForm) {
+                case SINE -> oscillator = new SineOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
+                case SQUARE ->  oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
+                case SAWTOOTH ->  oscillator = new SawtoothOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
+                case TRIANGLE ->  oscillator = new TriangleOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
             }
 
-            adsrEnvelope.setMainInputPort(oscillator.getMainOutput());//() -> 100);
-            adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutput);
+            e.setValue(new KeyPort());
 
-            mixer.addInputPort(adsrEnvelope.getMainOutputPort());//oscillator::next);
+            adsrEnvelope.setMainInputPort(oscillator.getMainOutputPort());
+            adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutputPort);
 
+            mixer.addInputPort(adsrEnvelope.getMainOutputPort());
         }
 
-        mainOutput = mixer.getMainOutputPort();
+        mainOutputPort = mixer.getMainOutputPort();
 
 
         JFrame frame = new JFrame();
@@ -143,7 +132,9 @@ public class PCKeyboardOscillatorModule {
 
     private static class KeyPort {
         private int keyPressed;
-        private final Port keyPressedOutput = () -> keyPressed;
+
+        @OutputPort
+        private final Port keyPressedOutputPort = () -> keyPressed;
     }
 
 
@@ -152,15 +143,15 @@ public class PCKeyboardOscillatorModule {
 
     public static void main(String[] args) {
 
-        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SAWTOOTH);
+        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SQUARE);
 
-        module.attackKnob.setValue(10000);
+        module.attackKnob.setValue(5000);
         module.decayKnob.setValue(0);
         module.sustainKnob.setValue(0.8);
         module.releaseKnob.setValue(40000);
 
 
-        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutput());
+        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
 
         audioPlayer.init();
         audioPlayer.start();

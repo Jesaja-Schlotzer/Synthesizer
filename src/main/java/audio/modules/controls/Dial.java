@@ -1,6 +1,5 @@
 package audio.modules.controls;
 
-import audio.enums.WaveForm;
 
 public class Dial<T> {
 
@@ -13,17 +12,23 @@ public class Dial<T> {
         this.selected = this.options[0];
     }
 
-    public void select(int index) {
+    public boolean select(int index) {
         if(index < options.length && index >= 0) {
             selected = options[index];
+            return true;
+        }else {
+            return false;
         }
     }
 
-    public void select(T selection) {
+    public boolean select(T selection) {
         for (T t : options) {
-            if(t.equals(selection))
+            if (t.equals(selection)) {
                 selected = selection;
+                return true;
+            }
         }
+        return false;
     }
 
 

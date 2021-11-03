@@ -1,18 +1,18 @@
 package audio.components.filters;
 
+import audio.enums.SampleRate;
+
 public class RCLowPassFilter extends Filter{
 
     private final double[] coeff = new double[2];
     private final double[] out = new double[2];
 
 
-    public RCLowPassFilter(double cutOffFrequency, double sampleRate) { // TODO Evtl cutOffFrequency auf > 0 beschränken, mit Oscilloscope mal schauen was negative Zahlen ergeben
+    public RCLowPassFilter(double cutOffFrequency, SampleRate sampleRate) { // TODO Evtl cutOffFrequency auf > 0 beschränken, mit Oscilloscope mal schauen was negative Zahlen ergeben
         double RC = 1.0 / (2 * Math.PI * (cutOffFrequency == 0 ? 0.0000001 : cutOffFrequency));
 
-        sampleRate = Math.max(sampleRate, 1);
-
-        coeff[0] = sampleRate / (sampleRate + RC);
-        coeff[1] = RC / (sampleRate + RC);
+        coeff[0] = sampleRate.get() / (sampleRate.get() + RC);
+        coeff[1] = RC / (sampleRate.get() + RC);
     }
 
     private RCLowPassFilter(double[] coeff) {
@@ -31,13 +31,11 @@ public class RCLowPassFilter extends Filter{
 
 
 
-    public void adjustFilter(double cutOffFrequency, double sampleRate) {
+    public void adjustFilter(double cutOffFrequency, SampleRate sampleRate) {
         double RC = 1.0 / (2 * Math.PI * (cutOffFrequency == 0 ? Double.MIN_VALUE : cutOffFrequency));
 
-        sampleRate = Math.max(sampleRate, 1);
-
-        coeff[0] = sampleRate / (sampleRate + RC);
-        coeff[1] = RC / (sampleRate + RC);
+        coeff[0] = sampleRate.get() / (sampleRate.get() + RC);
+        coeff[1] = RC / (sampleRate.get() + RC);
 
         out[0] = 0;
     }

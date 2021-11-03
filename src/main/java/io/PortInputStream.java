@@ -1,25 +1,33 @@
 package io;
 
+import audio.modules.io.InputPort;
 import audio.modules.io.Port;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 
-public class OutputToInputStream extends InputStream {
+public class PortInputStream extends InputStream {
+
+    @InputPort
+    private Port inputPort = Port.NULL;
 
 
-    Port output;
+    public void setInputPort(Port inputPort) {
+        if (inputPort != null) {
+            this.inputPort = inputPort;
+        }
+    }
 
 
-    public OutputToInputStream(Port output) {
-        this.output = output;
+    public PortInputStream(Port inputPort) {
+        this.inputPort = inputPort;
     }
 
 
     @Override
     public int read() {
-        return (int) output.out();
+        return (int) inputPort.out();
     }
 
     @Override
@@ -43,7 +51,7 @@ public class OutputToInputStream extends InputStream {
     @Override
     public long skip(long n) throws IOException {
         for (long i = 0; i < n; i++) {
-            output.out();
+            inputPort.out();
         }
         return n;
     }
@@ -60,16 +68,18 @@ public class OutputToInputStream extends InputStream {
     }
 
 
+    // Mark etc. is completely broken and does not work as intended, but this should be fine, because it should not be used anyway.
+
     Port markOutput;
 
     @Override
     public synchronized void mark(int readlimit) {
-        markOutput = output;
+        markOutput = inputPort;
     }
 
     @Override
     public synchronized void reset() throws IOException {
-        output = markOutput;
+        inputPort = markOutput;
         markOutput = null;
     }
 

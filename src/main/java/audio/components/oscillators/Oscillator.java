@@ -1,6 +1,7 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
+import audio.enums.SampleRate;
 import audio.modules.io.*;
 
 public abstract class Oscillator extends Generator {
@@ -10,7 +11,7 @@ public abstract class Oscillator extends Generator {
 
     public void setFrequencyInputPort(Port frequencyInputPort) {
         if(frequencyInputPort != null) {
-            this.frequencyInputPort = frequencyInputPort;
+            this.frequencyInputPort = () -> Math.max(frequencyInputPort.out(), 0);
         }
     }
 
@@ -20,17 +21,17 @@ public abstract class Oscillator extends Generator {
 
     public void setAmplitudeInputPort(Port amplitudeInputPort) {
         if(amplitudeInputPort != null) {
-            this.amplitudeInputPort = amplitudeInputPort;
+            this.amplitudeInputPort = () -> Math.max(frequencyInputPort.out(), 0);
         }
     }
 
 
 
     @OutputPort
-    protected final Port mainOutput = this::next;
+    protected final Port mainOutputPort = this::next;
 
-    public Port getMainOutput() {
-        return mainOutput;
+    public Port getMainOutputPort() {
+        return mainOutputPort;
     }
 
 
@@ -39,17 +40,17 @@ public abstract class Oscillator extends Generator {
     protected double t = 0;
 
 
-    public Oscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+    public Oscillator(Port frequencyInputPort, Port amplitudeInputPort, SampleRate sampleRate) {
         setFrequencyInputPort(frequencyInputPort);
         setAmplitudeInputPort(amplitudeInputPort);
-        this.sampleRate = sampleRate;
+        this.sampleRate = sampleRate.get();
     }
 
 
-    public Oscillator(double frequency, double amplitude, double sampleRate) {
+    public Oscillator(double frequency, double amplitude, SampleRate sampleRate) {
         frequencyInputPort = (frequency >= 0 ? () -> frequency : Port.NULL);
         amplitudeInputPort = (amplitude >= 0 ? () -> amplitude : Port.NULL);
-        this.sampleRate = sampleRate;
+        this.sampleRate = sampleRate.get();
     }
 
 

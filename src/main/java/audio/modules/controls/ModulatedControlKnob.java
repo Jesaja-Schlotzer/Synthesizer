@@ -1,45 +1,24 @@
 package audio.modules.controls;
 
-import audio.modules.io.*;
+import audio.modules.io.Port;
 
-/**
- * The {@code ModulatedControlKnob}
- */
+public class ModulatedControlKnob extends ControlComponent{
 
-public class ModulatedControlKnob{
+    private double knobRotation = 1;
 
-    @InputPort
-    private Port input;
 
-    public void setInput(Port input) {
-        this.input = input;
-    }
-
-    @OutputPort
-    private Port output;
-
-    public Port getOutput() {
-        return output;
+    public ModulatedControlKnob(Port inputPort) {
+        setInputPort(inputPort);
     }
 
 
-    private double knobRotation; // Between 0 and 1
-
-
-    public ModulatedControlKnob(Port input) {
-        this.input = input;
-        this.output = () -> input.out() * knobRotation;
-
-        knobRotation = 1;
+    @Override
+    protected double get() {
+        return knobRotation * inputPort.out();
     }
-
 
 
     public void setKnobRotation(double knobRotation) {
         this.knobRotation = Math.max(Math.min(knobRotation, 1), 0);
-    }
-
-    public double getKnobRotation() {
-        return knobRotation;
     }
 }

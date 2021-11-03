@@ -7,7 +7,4 @@ public abstract class Generator {
 
 
     public abstract String toString();
-
-    public abstract Generator clone();
-
 }

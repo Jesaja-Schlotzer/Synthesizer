@@ -1,21 +1,24 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
+import audio.enums.SampleRate;
 import audio.modules.io.Port;
 
 public class SineOscillator extends Oscillator {
 
 
-    public SineOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+    public SineOscillator(Port frequencyInputPort, Port amplitudeInputPort, SampleRate sampleRate) {
         super(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
 
-    public SineOscillator(double frequency, double amplitude, double sampleRate) {
+
+    public SineOscillator(double frequency, double amplitude, SampleRate sampleRate) {
         super(frequency, amplitude, sampleRate);
     }
 
 
 
+    @Override
     protected double next() {
         double value = Math.sin(t);
         t += (2 * Math.PI * frequencyInputPort.out()) / sampleRate;
@@ -33,12 +36,6 @@ public class SineOscillator extends Oscillator {
                     osc.sampleRate == this.sampleRate;
         }
         return false;
-    }
-
-
-    @Override
-    public Generator clone() {
-        return new SineOscillator(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
 
 

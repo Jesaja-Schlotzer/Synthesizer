@@ -1,11 +1,21 @@
 package io;
 
 import audio.components.Generator;
+import audio.modules.io.OutputPort;
+import audio.modules.io.Port;
+
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 
 public class Microphone extends Generator {
+
+    @OutputPort
+    private final Port outputPort = this::next;
+
+    public Port getOutputPort() {
+        return outputPort;
+    }
 
 
     byte[] microphoneBuffer; // TODO oder so
@@ -60,7 +70,7 @@ public class Microphone extends Generator {
     private int off;
 
     @Override
-    public double next() {
+    protected double next() {
         try {
             off++;
             if(off >= microphoneBuffer.length) {

@@ -1,16 +1,18 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
+import audio.enums.SampleRate;
 import audio.modules.io.Port;
 
 public class TriangleOscillator extends Oscillator {
 
 
-    public TriangleOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+    public TriangleOscillator(Port frequencyInputPort, Port amplitudeInputPort, SampleRate sampleRate) {
         super(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
 
-    public TriangleOscillator(double frequency, double amplitude, double sampleRate) {
+
+    public TriangleOscillator(double frequency, double amplitude, SampleRate sampleRate) {
         super(frequency, amplitude, sampleRate);
     }
 
@@ -36,12 +38,6 @@ public class TriangleOscillator extends Oscillator {
                     osc.sampleRate == this.sampleRate;
         }
         return false;
-    }
-
-
-    @Override
-    public Generator clone() {
-        return new TriangleOscillator(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
 
 

@@ -1,37 +1,42 @@
 package audio.components.oscillators;
 
 import audio.components.Generator;
+import audio.enums.SampleRate;
 import audio.modules.io.InputPort;
 import audio.modules.io.Port;
 
 public class SquareOscillator extends Oscillator {
 
     @InputPort
-    private Port pulseWidthInputPort = () -> 0.5;
+    private Port pulseWidthInputPort = Port.NULL;
 
     public void setPulseWidthInputPort(Port pulseWidthInputPort) {
-        this.pulseWidthInputPort = pulseWidthInputPort;
+        if (pulseWidthInputPort != null) {
+            this.pulseWidthInputPort = () -> Math.min(Math.max(pulseWidthInputPort.out(), -1), 1);
+        }
     }
 
 
-    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate) {
+
+    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, SampleRate sampleRate) {
         super(frequencyInputPort, amplitudeInputPort, sampleRate);
     }
 
-    public SquareOscillator(double frequency, double amplitude, double sampleRate) {
+
+    public SquareOscillator(double frequency, double amplitude, SampleRate sampleRate) {
         super(frequency, amplitude, sampleRate);
     }
 
-    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, double sampleRate, Port pulseWidthInputPort) {
+
+    public SquareOscillator(Port frequencyInputPort, Port amplitudeInputPort, SampleRate sampleRate, Port pulseWidthInputPort) {
         super(frequencyInputPort, amplitudeInputPort, sampleRate);
-
-        this.pulseWidthInputPort = pulseWidthInputPort;
+        setPulseWidthInputPort(pulseWidthInputPort);
     }
 
-    public SquareOscillator(double frequency, double amplitude, double sampleRate, double pulseWidth) {
-        super(frequency, amplitude, sampleRate);
 
-        this.pulseWidthInputPort = () -> pulseWidth;
+    public SquareOscillator(double frequency, double amplitude, SampleRate sampleRate, double pulseWidth) {
+        super(frequency, amplitude, sampleRate);
+        this.pulseWidthInputPort = (pulseWidth >= -1 && pulseWidth <= 1 ? () -> pulseWidth : Port.NULL);
     }
 
 
@@ -59,12 +64,6 @@ public class SquareOscillator extends Oscillator {
                     osc.pulseWidthInputPort == this.pulseWidthInputPort;
         }
         return false;
-    }
-
-
-    @Override
-    public Generator clone() {
-        return new SquareOscillator(frequencyInputPort, amplitudeInputPort, sampleRate, pulseWidthInputPort);
     }
 
 

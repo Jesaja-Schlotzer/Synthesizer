@@ -27,33 +27,31 @@ public class PCKeyboard{
     }};
 
 
-
-    @OutputPort
-    private Port mainOutput;
-
-    public Port getMainOutput() {
-        return mainOutput;
-    }
-
-
-    @OutputPort
-    private Port keyPressedOutput;
-
-    public Port getKeyPressedOutput() {
-        return keyPressedOutput;
-    }
-
-
-    private int keyPressed;
-
     private int octave = 3;
     private double frequency;
 
+    private int keyPressed;
+
+
+
+    @OutputPort
+    private final Port mainOutputPort = () -> Math.pow(2, octave) * frequency;
+
+    public Port getMainOutputPort() {
+        return mainOutputPort;
+    }
+
+
+    @OutputPort
+    private final Port keyPressedOutputPort = () -> keyPressed;
+
+    public Port getKeyPressedOutputPort() {
+        return keyPressedOutputPort;
+    }
+
+
 
     public PCKeyboard() {
-        mainOutput = () -> Math.pow(2, octave) * frequency;
-        keyPressedOutput = () -> keyPressed;
-
         JFrame frame = new JFrame();
         frame.setVisible(true);
 

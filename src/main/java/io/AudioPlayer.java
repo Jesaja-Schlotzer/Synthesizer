@@ -1,5 +1,6 @@
 package io;
 
+import audio.modules.io.InputPort;
 import audio.modules.io.Port;
 
 import javax.sound.sampled.*;
@@ -12,8 +13,16 @@ public class AudioPlayer {
     public static final int BUFFER_SIZE = 1024;
 
 
+    @InputPort
+    private Port inputPort;
 
-    private Port output;
+    public void setInputPort(Port inputPort) {
+        if (inputPort != null) {
+            this.inputPort = inputPort;
+        }
+    }
+
+
     private AudioFormat audioFormat;
     private InputStream audioInputStream;
     private SourceDataLine sourceDataLine;
@@ -25,10 +34,10 @@ public class AudioPlayer {
 
 
 
-    public AudioPlayer(Port output) {
-        this.output = output;
+    public AudioPlayer(Port inputPort) {
+        setInputPort(inputPort);
 
-        sampleRate = 44100; // TODO später von Synth lesen
+        sampleRate = 44100; // TODO später dynamisch (mit SampleRate enum) (genauso wie audioformat evtl dyn)
 
         audioFormat = new AudioFormat(
                 AudioFormat.Encoding.PCM_SIGNED,
@@ -43,7 +52,7 @@ public class AudioPlayer {
 
     public void init() {
         try {
-            audioInputStream = new OutputToInputStream(output);
+            audioInputStream = new PortInputStream(inputPort);
 
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 
@@ -58,7 +67,7 @@ public class AudioPlayer {
                     try {
                         bytesRead = audioInputStream.read(buffer);
                     } catch (IOException e) {
-                        System.out.println("Failed to read from AudioInputStream. Stopped player.");
+                        System.out.println("Failed to read from AudioInputStream. Stopping player.");
                         break;
                     }
 
