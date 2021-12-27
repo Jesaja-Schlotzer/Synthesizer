@@ -2,13 +2,16 @@ package audio.components.filters;
 
 import audio.enums.SampleRate;
 
+/**
+ * Not properly working at the moment.
+ */
 public class RCLowPassFilter extends Filter{
 
     private final double[] coeff = new double[2];
     private final double[] out = new double[2];
 
 
-    public RCLowPassFilter(double cutOffFrequency, SampleRate sampleRate) { // TODO Evtl cutOffFrequency auf > 0 beschränken, mit Oscilloscope mal schauen was negative Zahlen ergeben
+    public RCLowPassFilter(double cutOffFrequency, SampleRate sampleRate) {
         double RC = 1.0 / (2 * Math.PI * (cutOffFrequency == 0 ? 0.0000001 : cutOffFrequency));
 
         coeff[0] = sampleRate.get() / (sampleRate.get() + RC);

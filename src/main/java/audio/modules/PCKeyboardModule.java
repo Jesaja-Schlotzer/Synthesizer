@@ -1,7 +1,6 @@
 package audio.modules;
 
 import audio.components.combiners.Mixer;
-import audio.components.filters.RCLowPassFilter;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.oscillators.*;
 import audio.enums.SampleRate;
@@ -17,7 +16,14 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PCKeyboardOscillatorModule {
+
+/**
+ * A simple synthesizer, controllable via the PC Keyboard.<br><br>
+ *
+ * Y to M triggers the notes of the major scale and S, D, G, H, J triggers C#, D#, F#, G#, A#.<br>
+ * 0 to 9 can be used to change the octave of the Synth.
+ */
+public class PCKeyboardModule {
 
     private static final Map<Character, Double> keyToFreqMap = new HashMap<>(){{
         put('y', 16.35); // C
@@ -35,7 +41,7 @@ public class PCKeyboardOscillatorModule {
     }};
 
 
-    private final Map<Character, KeyPort> keyPortMap = new HashMap<>(){{
+    private final Map<Character, KeyPort> keyToKeyPortMap = new HashMap<>(){{
         put('y', null); // C
         put('s', null); // C#
         put('x', null); // D
@@ -51,6 +57,8 @@ public class PCKeyboardOscillatorModule {
     }};
 
 
+    public final ControlKnob amplitudeKnob;
+
     public final ControlKnob attackKnob;
     public final ControlKnob decayKnob;
     public final ControlKnob sustainKnob;
@@ -61,6 +69,9 @@ public class PCKeyboardOscillatorModule {
     @OutputPort
     private final Port mainOutputPort;
 
+    /**
+     * @return the <code>Port</code> that supplies the output audio of the synth
+     */
     public Port getMainOutputPort() {
         return mainOutputPort;
     }
@@ -70,8 +81,14 @@ public class PCKeyboardOscillatorModule {
     private int octave = 3;
 
 
+    /**
+     * Constructs a PC-Keyboard controlled Synth.
+     *
+     * @param waveForm The waveform of the synth to be used
+     */
+    public PCKeyboardModule(WaveForm waveForm) {
+        amplitudeKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
 
-    public PCKeyboardOscillatorModule(WaveForm waveForm) { // TODO TODO Input Port (von alles) in Konstruktor packen (weil wieso nicht) gerade bei Envelope ganz praktisch
         attackKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
         decayKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
         sustainKnob = new ControlKnob(ControlKnob.ZERO_TO_ONE);
@@ -79,21 +96,21 @@ public class PCKeyboardOscillatorModule {
 
         Mixer mixer = new Mixer();
 
-        for (Map.Entry<Character, KeyPort> e : keyPortMap.entrySet()) {
+        for (Map.Entry<Character, KeyPort> e : keyToKeyPortMap.entrySet()) {
             ADSREnvelope adsrEnvelope = new ADSREnvelope(attackKnob::getValue, decayKnob::getValue, sustainKnob::getValue, releaseKnob::getValue);
 
             Oscillator oscillator = null;
 
             switch (waveForm) {
-                case SINE -> oscillator = new SineOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
-                case SQUARE ->  oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
-                case SAWTOOTH ->  oscillator = new SawtoothOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
-                case TRIANGLE ->  oscillator = new TriangleOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), () -> 100, SampleRate._44100);
+                case SINE -> oscillator = new SineOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
+                case SQUARE ->  oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
+                case SAWTOOTH ->  oscillator = new SawtoothOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
+                case TRIANGLE ->  oscillator = new TriangleOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
             }
 
             e.setValue(new KeyPort());
 
-            adsrEnvelope.setMainInputPort(oscillator.getMainOutputPort());
+            adsrEnvelope.setMainInputPort(oscillator.getOutputPort());
             adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutputPort);
 
             mixer.addInputPort(adsrEnvelope.getMainOutputPort());
@@ -113,7 +130,7 @@ public class PCKeyboardOscillatorModule {
                     octave = e.getKeyCode() - 48;
                 } else {
                     if (keyToFreqMap.containsKey(e.getKeyChar())) {
-                        keyPortMap.get(e.getKeyChar()).keyPressed = 1;
+                        keyToKeyPortMap.get(e.getKeyChar()).keyPressed = 1;
                     }
                 }
             }
@@ -122,7 +139,7 @@ public class PCKeyboardOscillatorModule {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (keyToFreqMap.containsKey(e.getKeyChar())) {
-                    keyPortMap.get(e.getKeyChar()).keyPressed = 0;
+                    keyToKeyPortMap.get(e.getKeyChar()).keyPressed = 0;
                 }
             }
         });
@@ -130,7 +147,9 @@ public class PCKeyboardOscillatorModule {
     }
 
 
-
+    /**
+     * Helper-class to keep track of keypress events.
+     */
     private static class KeyPort {
         private int keyPressed;
 
@@ -139,28 +158,39 @@ public class PCKeyboardOscillatorModule {
     }
 
 
-
-
-
+    /**
+     * An example of how the <code>PCKeyboardModule</code> could be used.
+     */
     public static void main(String[] args) {
 
-        PCKeyboardOscillatorModule module = new PCKeyboardOscillatorModule(WaveForm.SINE);
+        PCKeyboardModule module = new PCKeyboardModule(WaveForm.SQUARE);
 
+        // Setting the amplitude or loudness of the synth
+        module.amplitudeKnob.setValue(32);
+
+        // Setting the attributes of the envelope
         module.attackKnob.setValue(5000);
         module.decayKnob.setValue(0);
         module.sustainKnob.setValue(0.8);
         module.releaseKnob.setValue(20000);
 
-        RCLowPassFilter rcLowPassFilter = new RCLowPassFilter(0, SampleRate._44100);
+        // Creating an AudioPlayer with the synth's audio output
+        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
 
-        rcLowPassFilter.setInputPort(module.getMainOutputPort());
-
-        AudioPlayer audioPlayer = new AudioPlayer(rcLowPassFilter.getOutputPort());
-
+        // Initializing and starting the AudioPlayer
         audioPlayer.init();
         audioPlayer.start();
 
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        // Stopping the AudioPlayer
+        audioPlayer.stop();
+
+        System.exit(0);
     }
 
 }

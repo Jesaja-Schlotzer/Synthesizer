@@ -1,30 +1,24 @@
 package io;
 
 import audio.components.Generator;
-import audio.modules.io.OutputPort;
-import audio.modules.io.Port;
-
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 
+/**
+ * The <code>Microphone</code> class can capture a microphone input.
+ */
 public class Microphone extends Generator {
 
-    @OutputPort
-    private final Port outputPort = this::next;
 
-    public Port getOutputPort() {
-        return outputPort;
-    }
+    private final byte[] microphoneBuffer;
 
-
-    byte[] microphoneBuffer; // TODO oder so
-
-    TargetDataLine targetDataLine;
-    AudioInputStream recordStream;
+    private final TargetDataLine targetDataLine;
+    private final AudioInputStream recordStream;
 
     /**
-     * Standard constructor, with Mono AudioFormat
+     * Constructs an <code>Microphone</code> with a standard <code>AudioFormat</code>.
+     * @throws LineUnavailableException if a matching line is not available due to resource restrictions
      */
     public Microphone() throws LineUnavailableException {
         this(new AudioFormat(
@@ -37,6 +31,11 @@ public class Microphone extends Generator {
                 false));
     }
 
+    /**
+     * Constructs an <code>Microphone</code> with a custom <code>AudioFormat</code>.
+     * @param audioFormat the <code>AudioFormat</code> the microphone data will be formatted with.
+     * @throws LineUnavailableException if a matching line is not available due to resource restrictions
+     */
     public Microphone(AudioFormat audioFormat) throws LineUnavailableException {
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
 
@@ -49,18 +48,23 @@ public class Microphone extends Generator {
     }
 
 
-    public void connectMicrophone() {
-        targetDataLine.start();
-    }
-
+    /**
+     * The <code>OutputPort</code> starts to provide an audio signal from the microphone.
+     */
     public void startListening() {
         targetDataLine.start();
     }
 
+    /**
+     * The <code>OutputPort</code> stops to provide an audio signal from the microphone.
+     */
     public void stopListening() {
         targetDataLine.stop();
     }
 
+    /**
+     * Closes the connection to the microphone.
+     */
     public void disconnectMicrophone() {
         targetDataLine.close();
     }
@@ -69,6 +73,9 @@ public class Microphone extends Generator {
 
     private int off;
 
+    /**
+     * @return the next piece of audio data from the microphone
+     */
     @Override
     protected double next() {
         try {
@@ -77,7 +84,6 @@ public class Microphone extends Generator {
                 off = 0;
                 recordStream.read(microphoneBuffer);
             }
-            System.out.println(microphoneBuffer[off]);
             return microphoneBuffer[off];
         } catch (IOException e) {
             e.printStackTrace();

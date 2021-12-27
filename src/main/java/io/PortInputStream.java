@@ -6,22 +6,31 @@ import audio.modules.io.Port;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+/**
+ * A <code>PortInputStream</code> is an <code>InputStream</code> that streams the signal of a <code>Port</code>.
+ */
 public class PortInputStream extends InputStream {
 
     @InputPort
     private Port inputPort = Port.NULL;
 
-
+    /**
+     * @param inputPort The source for the stream
+     */
     public void setInputPort(Port inputPort) {
         if (inputPort != null) {
             this.inputPort = inputPort;
         }
     }
 
-
+    /**
+     * Constructs a <code>PortInputStream</code> and sets the source for the stream.
+     * @param inputPort the source for the stream
+     */
     public PortInputStream(Port inputPort) {
-        this.inputPort = inputPort;
+        if (inputPort != null) {
+            this.inputPort = inputPort;
+        }
     }
 
 
@@ -31,12 +40,12 @@ public class PortInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(byte[] b) {
         return read(b,0, b.length);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte[] b, int off, int len) {
         byte[] readBytes = new byte[len];
         for (int i = 0; i < readBytes.length; i++) {
             readBytes[i] = (byte) read();
@@ -49,7 +58,7 @@ public class PortInputStream extends InputStream {
 
 
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n) {
         for (long i = 0; i < n; i++) {
             inputPort.out();
         }
@@ -58,7 +67,7 @@ public class PortInputStream extends InputStream {
 
 
     @Override
-    public int available() throws IOException {
+    public int available() {
         return Integer.MAX_VALUE;
     }
 
@@ -68,7 +77,7 @@ public class PortInputStream extends InputStream {
     }
 
 
-    // Mark etc. is completely broken and does not work as intended, but this should be fine, because it should not be used anyway.
+    // The mark feature is does not work as intended, but this should be fine because it should not be used anyway.
 
     Port markOutput;
 
@@ -78,7 +87,7 @@ public class PortInputStream extends InputStream {
     }
 
     @Override
-    public synchronized void reset() throws IOException {
+    public synchronized void reset() {
         inputPort = markOutput;
         markOutput = null;
     }

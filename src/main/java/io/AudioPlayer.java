@@ -7,6 +7,9 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * The <code>AudioPlayer</code> passes an incoming signal to the PC speaker.
+ */
 public class AudioPlayer {
 
 
@@ -16,6 +19,9 @@ public class AudioPlayer {
     @InputPort
     private Port inputPort;
 
+    /**
+     * @param inputPort the signal to send to the speaker
+     */
     public void setInputPort(Port inputPort) {
         if (inputPort != null) {
             this.inputPort = inputPort;
@@ -30,26 +36,37 @@ public class AudioPlayer {
     private Thread playerThread;
 
 
-    private int sampleRate;
-
-
-
+    /**
+     * Constructs an <code>AudioPlayer</code> with a standard <code>AudioFormat</code> and takes in an <code>InputPort</code>.
+     * @param inputPort the signal to send to the speaker
+     */
     public AudioPlayer(Port inputPort) {
         setInputPort(inputPort);
 
-        sampleRate = 44100; // TODO später dynamisch (mit SampleRate enum) (genauso wie audioformat evtl dyn)
-
         audioFormat = new AudioFormat(
                 AudioFormat.Encoding.PCM_SIGNED,
-                sampleRate,
+                44100,
                 8,
                 1,
                 1,
-                sampleRate,
+                44100,
                 false);
     }
 
+    /**
+     * Constructs an <code>AudioPlayer</code> with a custom <code>AudioFormat</code> and takes in an <code>InputPort</code>.
+     * @param inputPort the signal to send to the speaker
+     */
+    public AudioPlayer(Port inputPort, AudioFormat audioFormat) {
+        setInputPort(inputPort);
 
+        this.audioFormat = audioFormat;
+    }
+
+
+    /**
+     * Initializes the <code>AudioPlayer</code>.
+     */
     public void init() {
         try {
             audioInputStream = new PortInputStream(inputPort);
@@ -60,7 +77,7 @@ public class AudioPlayer {
 
 
             playerThread = new Thread(() -> {
-                int bytesRead = 0;
+                int bytesRead;
                 byte[] buffer = new byte[BUFFER_SIZE];
                 while (!playerThread.isInterrupted()) {
 
@@ -74,6 +91,14 @@ public class AudioPlayer {
                     sourceDataLine.write(buffer, 0, bytesRead);
                 }
 
+                sourceDataLine.close();
+
+                try {
+                    audioInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             });
 
         } catch (LineUnavailableException e) {
@@ -82,6 +107,9 @@ public class AudioPlayer {
     }
 
 
+    /**
+     * Starts the <code>AudioPlayer</code> to actually send audio to the speaker.
+     */
     public void start() {
         try {
             sourceDataLine.open(audioFormat);
@@ -93,14 +121,11 @@ public class AudioPlayer {
     }
 
 
-
+    /**
+     * Stops the <code>AudioPlayer</code> from sending audio to a speaker.
+     * Needs to be initialized again afterwards to start the <code>AudioPlayer</code> again.
+     */
     public void stop() {
-        try {
-            playerThread.interrupt();
-            sourceDataLine.close();
-            audioInputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        playerThread.interrupt();
     }
 }

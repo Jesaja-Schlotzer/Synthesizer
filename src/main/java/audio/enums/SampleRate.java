@@ -1,5 +1,8 @@
 package audio.enums;
 
+/**
+ * This <code>enum</code> provides common sample rates.
+ */
 public enum SampleRate {
     _8000(8000),
     _11025(11025),
