@@ -150,6 +150,10 @@ public class MidiKeyboardModule {
      * An example of how the <code>MidiKeyboardModule</code> could be used.
      */
     public static void main(String[] args) {
+        // Tip:
+        // If you don't know how your midi device is called just run this method and look at the console.
+        // The "openMidiDevice" method of the "MidiHandler" class prints out all the found midi device names.
+        // Just look for the name that sounds like the one of your device.
         MidiKeyboardModule module = new MidiKeyboardModule("Arturia MiniLab mkII", WaveForm.SQUARE, 8);
 
         // Setting the amplitude or loudness of the synth
