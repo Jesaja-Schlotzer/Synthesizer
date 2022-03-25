@@ -23,7 +23,7 @@ import java.util.Map;
  * Y to M triggers the notes of the major scale and S, D, G, H, J triggers C#, D#, F#, G#, A#.<br>
  * 0 to 9 can be used to change the octave of the Synth.
  */
-public class PCKeyboardModule {
+public class PCKeyboardModulateableModule {
 
     private static final Map<Character, Double> keyToFreqMap = new HashMap<>(){{
         put('y', 16.35); // C
@@ -86,7 +86,7 @@ public class PCKeyboardModule {
      *
      * @param waveForm The waveform of the synth to be used
      */
-    public PCKeyboardModule(WaveForm waveForm) {
+    public PCKeyboardModulateableModule(WaveForm waveForm) {
         amplitudeKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
 
         attackKnob = new ControlKnob(ControlKnob.NON_NEGATIVE);
@@ -101,11 +101,19 @@ public class PCKeyboardModule {
 
             Oscillator oscillator = null;
 
+            Port freqInputPort = () -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey());
+
+            Oscillator freqModOsc = new SineOscillator(4, 7, SampleRate._44100);
+            Oscillator amplModOsc = new TriangleOscillator(3, 8, SampleRate._44100);
+
+            Mixer freqModMixer = new Mixer(freqInputPort, freqModOsc.getOutputPort());
+            Mixer amplModMixer = new Mixer(amplitudeKnob::getValue, amplModOsc.getOutputPort());
+
             switch (waveForm) {
-                case SINE -> oscillator = new SineOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
-                case SQUARE ->  oscillator = new SquareOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
-                case SAWTOOTH ->  oscillator = new SawtoothOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
-                case TRIANGLE ->  oscillator = new TriangleOscillator(() -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey()), amplitudeKnob::getValue, SampleRate._44100);
+                case SINE -> oscillator = new SineOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
+                case SQUARE ->  oscillator = new SquareOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
+                case SAWTOOTH ->  oscillator = new SawtoothOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
+                case TRIANGLE ->  oscillator = new TriangleOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
             }
 
             e.setValue(new KeyPort());
@@ -163,16 +171,16 @@ public class PCKeyboardModule {
      */
     public static void main(String[] args) {
 
-        PCKeyboardModule module = new PCKeyboardModule(WaveForm.SQUARE);
+        PCKeyboardModulateableModule module = new PCKeyboardModulateableModule(WaveForm.SQUARE);
 
         // Setting the amplitude or loudness of the synth
-        module.amplitudeKnob.setValue(32);
+        module.amplitudeKnob.setValue(64);
 
         // Setting the attributes of the envelope
-        module.attackKnob.setValue(5000);
-        module.decayKnob.setValue(0);
+        module.attackKnob.setValue(2000);
+        module.decayKnob.setValue(300);
         module.sustainKnob.setValue(0.8);
-        module.releaseKnob.setValue(20000);
+        module.releaseKnob.setValue(15000);
 
         // Creating an AudioPlayer with the synth's audio output
         AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());

@@ -84,7 +84,7 @@ public class AudioPlayer {
                     try {
                         bytesRead = audioInputStream.read(buffer);
                     } catch (IOException e) {
-                        System.out.println("Failed to read from AudioInputStream. Stopping player.");
+                        System.err.println("Failed to read from AudioInputStream. Stopping player.");
                         break;
                     }
 
