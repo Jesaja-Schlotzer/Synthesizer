@@ -103,7 +103,7 @@ public class PCKeyboardModulateableModule {
 
             Port freqInputPort = () -> Math.pow(2, octave) * keyToFreqMap.get(e.getKey());
 
-            Oscillator freqModOsc = new SineOscillator(4, 7, SampleRate._44100);
+            Oscillator freqModOsc = new SineOscillator(13, 7, SampleRate._44100);
             Oscillator amplModOsc = new TriangleOscillator(3, 8, SampleRate._44100);
 
             Mixer freqModMixer = new Mixer(freqInputPort, freqModOsc.getOutputPort());
