@@ -67,13 +67,13 @@ public class PCKeyboardModule {
 
 
     @OutputPort
-    private final Port mainOutputPort;
+    private final Port outputPort;
 
     /**
      * @return the <code>Port</code> that supplies the output audio of the synth
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
 
@@ -113,10 +113,10 @@ public class PCKeyboardModule {
             adsrEnvelope.setMainInputPort(oscillator.getOutputPort());
             adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutputPort);
 
-            mixer.addInputPort(adsrEnvelope.getMainOutputPort());
+            mixer.addInputPort(adsrEnvelope.getOutputPort());
         }
 
-        mainOutputPort = mixer.getMainOutputPort();
+        outputPort = mixer.getOutputPort();
 
 
         JFrame frame = new JFrame();
@@ -175,7 +175,7 @@ public class PCKeyboardModule {
         module.releaseKnob.setValue(20000);
 
         // Creating an AudioPlayer with the synth's audio output
-        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
+        AudioPlayer audioPlayer = new AudioPlayer(module.getOutputPort());
 
         // Initializing and starting the AudioPlayer
         audioPlayer.init();

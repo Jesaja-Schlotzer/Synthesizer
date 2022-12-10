@@ -67,13 +67,13 @@ public class PCKeyboardModulateableModule {
 
 
     @OutputPort
-    private final Port mainOutputPort;
+    private final Port outputPort;
 
     /**
      * @return the <code>Port</code> that supplies the output audio of the synth
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
 
@@ -110,10 +110,10 @@ public class PCKeyboardModulateableModule {
             Mixer amplModMixer = new Mixer(amplitudeKnob::getValue, amplModOsc.getOutputPort());
 
             switch (waveForm) {
-                case SINE -> oscillator = new SineOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
-                case SQUARE ->  oscillator = new SquareOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
-                case SAWTOOTH ->  oscillator = new SawtoothOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
-                case TRIANGLE ->  oscillator = new TriangleOscillator(freqModMixer.getMainOutputPort(), amplModMixer.getMainOutputPort(), SampleRate._44100);
+                case SINE -> oscillator = new SineOscillator(freqModMixer.getOutputPort(), amplModMixer.getOutputPort(), SampleRate._44100);
+                case SQUARE ->  oscillator = new SquareOscillator(freqModMixer.getOutputPort(), amplModMixer.getOutputPort(), SampleRate._44100);
+                case SAWTOOTH ->  oscillator = new SawtoothOscillator(freqModMixer.getOutputPort(), amplModMixer.getOutputPort(), SampleRate._44100);
+                case TRIANGLE ->  oscillator = new TriangleOscillator(freqModMixer.getOutputPort(), amplModMixer.getOutputPort(), SampleRate._44100);
             }
 
             e.setValue(new KeyPort());
@@ -121,10 +121,10 @@ public class PCKeyboardModulateableModule {
             adsrEnvelope.setMainInputPort(oscillator.getOutputPort());
             adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutputPort);
 
-            mixer.addInputPort(adsrEnvelope.getMainOutputPort());
+            mixer.addInputPort(adsrEnvelope.getOutputPort());
         }
 
-        mainOutputPort = mixer.getMainOutputPort();
+        outputPort = mixer.getOutputPort();
 
 
         JFrame frame = new JFrame();
@@ -183,7 +183,7 @@ public class PCKeyboardModulateableModule {
         module.releaseKnob.setValue(15000);
 
         // Creating an AudioPlayer with the synth's audio output
-        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
+        AudioPlayer audioPlayer = new AudioPlayer(module.getOutputPort());
 
         // Initializing and starting the AudioPlayer
         audioPlayer.init();

@@ -1,6 +1,10 @@
 package audio.components.combiners;
 
+import audio.components.Generator;
+import audio.components.oscillators.SawtoothOscillator;
+import audio.enums.SampleRate;
 import audio.modules.io.*;
+import io.AudioPlayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,14 +21,14 @@ public class Mixer{
 
 
     @OutputPort
-    private final Port mainOutputPort = this::mix;
+    private final Port outputPort = this::mix;
 
     /**
      * Returns the output port where the mixed audio signal will be sent.
      * @return the main output port
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
     /**
@@ -61,5 +65,31 @@ public class Mixer{
         }
 
         return sum / inputPorts.size();
+    }
+
+
+    public static void main(String[] args) throws InterruptedException {
+        SawtoothOscillator[] oscList = new SawtoothOscillator[4];
+
+        for (int i = 0; i < oscList.length; i++) {
+            oscList[i] = new SawtoothOscillator(440+Math.random()*10, 2, SampleRate._44100);
+
+            for (int j = 0; j < (int) (Math.random()*10000); j++) {
+                oscList[i].getOutputPort().out();
+            }
+        }
+
+        Mixer mixer = new Mixer(Arrays.stream(oscList).map(Generator::getOutputPort).toList().toArray(Port[]::new));
+
+
+        AudioPlayer player = new AudioPlayer(mixer.getOutputPort());
+
+        player.init();
+
+        player.start();
+
+        Thread.sleep(2000);
+
+        player.stop();
     }
 }

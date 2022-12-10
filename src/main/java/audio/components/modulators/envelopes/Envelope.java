@@ -45,13 +45,13 @@ public abstract class Envelope implements Pressable {
 
 
     @OutputPort
-    protected final Port mainOutputPort = this::modulate;
+    protected final Port outputPort = this::modulate;
 
     /**
      * @return the <code>outputPort</code> that supplies the modulated signal
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
 

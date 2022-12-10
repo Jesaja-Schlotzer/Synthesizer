@@ -68,13 +68,13 @@ public class MidiKeyboardModulatableModule {
     public final ModulatableControlKnob releaseKnob;
 
     @OutputPort
-    private final Port mainOutputPort;
+    private final Port outputPort;
 
     /**
      * @return the <code>Port</code> that supplies the output audio of the synth
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
 
@@ -107,10 +107,10 @@ public class MidiKeyboardModulatableModule {
             Oscillator osc = null;
 
             switch (waveForm) {
-                case SINE -> osc = new SineOscillator(Port.NULL, adsrEnvelope.getMainOutputPort(), SampleRate._44100);
-                case SQUARE -> osc = new SquareOscillator(Port.NULL, adsrEnvelope.getMainOutputPort(), SampleRate._44100);
-                case SAWTOOTH -> osc = new SawtoothOscillator(Port.NULL, adsrEnvelope.getMainOutputPort(), SampleRate._44100);
-                case TRIANGLE -> osc = new TriangleOscillator(Port.NULL, adsrEnvelope.getMainOutputPort(), SampleRate._44100);
+                case SINE -> osc = new SineOscillator(Port.NULL, adsrEnvelope.getOutputPort(), SampleRate._44100);
+                case SQUARE -> osc = new SquareOscillator(Port.NULL, adsrEnvelope.getOutputPort(), SampleRate._44100);
+                case SAWTOOTH -> osc = new SawtoothOscillator(Port.NULL, adsrEnvelope.getOutputPort(), SampleRate._44100);
+                case TRIANGLE -> osc = new TriangleOscillator(Port.NULL, adsrEnvelope.getOutputPort(), SampleRate._44100);
             }
 
             mixer.addInputPort(osc.getOutputPort());
@@ -157,7 +157,7 @@ public class MidiKeyboardModulatableModule {
         }, midiDeviceName);
 
 
-        this.mainOutputPort = mixer.getMainOutputPort();
+        this.outputPort = mixer.getOutputPort();
 
     }
 
@@ -191,7 +191,7 @@ public class MidiKeyboardModulatableModule {
         module.releaseKnob.setKnobRotation(1700);
 
         // Creating an AudioPlayer with the synth's audio output
-        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
+        AudioPlayer audioPlayer = new AudioPlayer(module.getOutputPort());
 
         // Initializing and starting the AudioPlayer
         audioPlayer.init();

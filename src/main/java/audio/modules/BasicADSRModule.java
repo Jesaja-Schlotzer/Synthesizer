@@ -32,13 +32,13 @@ public class BasicADSRModule {
 
 
     @OutputPort
-    private final Port mainOutputPort;
+    private final Port outputPort;
 
     /**
      * @return the <code>outputPort</code> that supplies the modulated signal
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
     /**
@@ -52,7 +52,7 @@ public class BasicADSRModule {
 
         adsrEnvelope = new ADSREnvelope(attackKnob::getValue, decayKnob::getValue, sustainKnob::getValue, releaseKnob::getValue);
 
-        mainOutputPort = adsrEnvelope.getMainOutputPort();
+        outputPort = adsrEnvelope.getOutputPort();
     }
 
     /**
@@ -83,7 +83,7 @@ public class BasicADSRModule {
         basicADSRModule.releaseKnob.setValue(44100);
 
         // Creating an AudioPlayer and setting its input to the output of the envelope
-        AudioPlayer audioPlayer = new AudioPlayer(basicADSRModule.getMainOutputPort());
+        AudioPlayer audioPlayer = new AudioPlayer(basicADSRModule.getOutputPort());
 
         // Initializing and starting the AudioPlayer
         audioPlayer.init();

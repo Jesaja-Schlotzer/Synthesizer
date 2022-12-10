@@ -4,7 +4,6 @@ import audio.components.combiners.Mixer;
 import audio.components.modulators.envelopes.ADSREnvelope;
 import audio.components.oscillators.*;
 import audio.enums.SampleRate;
-import audio.enums.WaveForm;
 import audio.modules.controls.ControlKnob;
 import audio.modules.io.OutputPort;
 import audio.modules.io.Port;
@@ -73,13 +72,13 @@ public class FMSynth {
 
 
     @OutputPort
-    private final Port mainOutputPort;
+    private final Port outputPort;
 
     /**
      * @return the <code>Port</code> that supplies the output audio of the synth
      */
-    public Port getMainOutputPort() {
-        return mainOutputPort;
+    public Port getOutputPort() {
+        return outputPort;
     }
 
 
@@ -122,10 +121,10 @@ public class FMSynth {
             adsrEnvelope.setMainInputPort(op2.getOutputPort());
             adsrEnvelope.setTriggerInputPort(e.getValue().keyPressedOutputPort);
 
-            mixer.addInputPort(adsrEnvelope.getMainOutputPort());
+            mixer.addInputPort(adsrEnvelope.getOutputPort());
         }
 
-        mainOutputPort = mixer.getMainOutputPort();
+        outputPort = mixer.getOutputPort();
 
         JFrame frame = new JFrame();
         frame.setVisible(true);
@@ -193,7 +192,7 @@ public class FMSynth {
         module.OP3_FREQ_RATIO.setValue(11);
 
         // Creating an AudioPlayer with the synth's audio output
-        AudioPlayer audioPlayer = new AudioPlayer(module.getMainOutputPort());
+        AudioPlayer audioPlayer = new AudioPlayer(module.getOutputPort());
 
         // Initializing and starting the AudioPlayer
         audioPlayer.init();
